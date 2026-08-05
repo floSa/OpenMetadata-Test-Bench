@@ -1,0 +1,72 @@
+# =====================================================================
+# Chapitre 04 — ingestion des métadonnées du playground Postgres
+# =====================================================================
+#   ./omlab ingest tp/04-ingestion/metadata.yaml
+#
+# Anatomie d'un workflow OpenMetadata (toujours les mêmes 4 blocs) :
+#   source         d'où viennent les métadonnées, et quoi filtrer
+#   processor      transformations optionnelles (absent ici)
+#   sink           où les envoyer (toujours metadata-rest en pratique)
+#   workflowConfig comment joindre le serveur OpenMetadata
+# =====================================================================
+
+source:
+  # `type` désigne le connecteur. La liste complète : metadata --help
+  type: postgres
+
+  # Nom du service tel qu'il apparaîtra dans le catalogue. C'est la racine
+  # de tous les FQN : omlab_postgres.omlab.raw.customers
+  serviceName: ${OMLAB_SERVICE_NAME}
+
+  serviceConnection:
+    config:
+      type: Postgres
+      # Compte en lecture seule créé par docker/seed/04_users.sql.
+      # On ne connecte jamais un catalogue avec un superutilisateur.
+      username: ${OMLAB_PG_USER}
+      authType:
+        password: ${OMLAB_PG_PASSWORD}
+      # Vu depuis le conteneur d'ingestion, la base n'est pas sur localhost
+      hostPort: ${OMLAB_PG_HOST_INTERNAL}:${OMLAB_PG_PORT_INTERNAL}
+      database: ${OMLAB_PG_DB}
+      ingestAllDatabases: false
+
+  sourceConfig:
+    config:
+      type: DatabaseMetadata
+
+      # --- Ce qu'on ramène -------------------------------------------
+      includeTables: true
+      includeViews: true          # indispensable : les vues portent le lineage
+      includeTags: true
+      includeOwners: false
+      markDeletedTables: true     # une table supprimée en base est marquée
+                                  # comme supprimée dans le catalogue
+
+      # --- Ce qu'on filtre -------------------------------------------
+      # Les patterns sont des expressions régulières. Sans ancrage (^ $),
+      # "raw" matcherait aussi "raw_archive" : c'est le piège classique.
+      schemaFilterPattern:
+        includes:
+          - "^raw$"
+          - "^analytics$"
+
+      # Exemple d'exclusion : on ne catalogue pas les tables temporaires
+      tableFilterPattern:
+        excludes:
+          - ".*_tmp$"
+          - "^tmp_.*"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    # Depuis le conteneur d'ingestion, le serveur s'appelle openmetadata-server.
+    # Notez le suffixe /api : c'est l'erreur n°1 quand on écrit ce fichier à la main.
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

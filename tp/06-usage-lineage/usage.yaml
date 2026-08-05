@@ -1,0 +1,67 @@
+# =====================================================================
+# Chapitre 06 — usage : quelles tables sont réellement utilisées ?
+# =====================================================================
+#   ./omlab traffic                            (indispensable avant)
+#   ./omlab usage tp/06-usage-lineage/usage.yaml
+#
+# Ce workflow a une structure PLUS LONGUE que les autres : six blocs au
+# lieu de quatre. C'est le seul cas du produit, et il s'explique :
+#
+#   source     lit les requêtes exécutées (ici pg_stat_statements)
+#   processor  les parse pour en extraire les tables lues
+#   stage      accumule les résultats dans un fichier temporaire
+#   bulkSink   envoie le tout en une fois au serveur
+#
+# Pourquoi stage + bulkSink ? Parce qu'on agrège des milliers de requêtes
+# avant d'écrire : envoyer un appel API par requête écroulerait le serveur.
+# =====================================================================
+
+source:
+  # Notez le suffixe : postgres-usage, et non postgres
+  type: postgres-usage
+  serviceName: ${OMLAB_SERVICE_NAME}
+  serviceConnection:
+    config:
+      type: Postgres
+      username: ${OMLAB_PG_USER}
+      authType:
+        password: ${OMLAB_PG_PASSWORD}
+      hostPort: ${OMLAB_PG_HOST_INTERNAL}:${OMLAB_PG_PORT_INTERNAL}
+      database: ${OMLAB_PG_DB}
+
+  sourceConfig:
+    config:
+      type: DatabaseUsage
+
+      # Fenêtre remontée, en jours. Attention : pg_stat_statements n'a PAS
+      # d'horodatage par exécution, donc sur Postgres ce paramètre sert
+      # surtout à dater les résultats, pas à filtrer la source.
+      queryLogDuration: 30
+
+      # Nombre maximum de requêtes distinctes analysées par exécution
+      resultLimit: 1000
+
+      # Requêtes à ignorer (les vôtres, celles des outils de monitoring...)
+      filterCondition: ""
+
+processor:
+  type: query-parser
+  config: {}
+
+stage:
+  type: table-usage
+  config:
+    filename: /tmp/omlab_usage
+
+bulkSink:
+  type: metadata-usage
+  config:
+    filename: /tmp/omlab_usage
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

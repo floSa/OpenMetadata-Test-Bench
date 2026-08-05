@@ -1,0 +1,53 @@
+# =====================================================================
+# Chapitre 06 — lineage déduit des requêtes SQL observées
+# =====================================================================
+#   ./omlab traffic                              (indispensable avant)
+#   ./omlab ingest tp/06-usage-lineage/lineage.yaml
+#
+# Trois sources de lineage coexistent dans OpenMetadata, par ordre de fiabilité :
+#
+#   1. LES VUES  — le connecteur lit leur définition SQL. Fiable, gratuit,
+#      obtenu dès le chapitre 04. C'est pour ça que v_revenue_monthly a déjà
+#      son lineage alors qu'on n'a rien lancé de spécifique.
+#   2. LES REQUÊTES OBSERVÉES — ce fichier. Il parse les INSERT ... SELECT
+#      et CREATE TABLE AS trouvés dans pg_stat_statements. Puissant, mais
+#      dépendant de ce que la base a bien voulu retenir.
+#   3. LA SAISIE MANUELLE / L'API — chapitre 11. Le filet de sécurité.
+#
+# Ce workflow se lance avec `metadata ingest` (et non `metadata usage`) :
+# il n'agrège rien, il écrit des relations au fil de l'eau.
+# =====================================================================
+
+source:
+  type: postgres-lineage
+  serviceName: ${OMLAB_SERVICE_NAME}
+  serviceConnection:
+    config:
+      type: Postgres
+      username: ${OMLAB_PG_USER}
+      authType:
+        password: ${OMLAB_PG_PASSWORD}
+      hostPort: ${OMLAB_PG_HOST_INTERNAL}:${OMLAB_PG_PORT_INTERNAL}
+      database: ${OMLAB_PG_DB}
+
+  sourceConfig:
+    config:
+      type: DatabaseLineage
+      queryLogDuration: 30
+      resultLimit: 1000
+
+      # Le parsing SQL n'est pas infaillible : les requêtes trop exotiques
+      # sont ignorées plutôt que d'inventer un lineage faux.
+      parsingTimeoutLimit: 300
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

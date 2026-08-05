@@ -1,0 +1,92 @@
+# =====================================================================
+# Chapitre 05 — profiling et échantillonnage
+# =====================================================================
+#   ./omlab profile tp/05-profiler/profiler.yaml
+#
+# Différence essentielle avec le chapitre 04 :
+#   * l'ingestion de métadonnées lit le *catalogue système* de Postgres.
+#     Elle est rapide et ne touche pas aux données.
+#   * le profiler exécute de vraies requêtes d'agrégation SUR les données
+#     (min, max, count distinct, % de nulls...). C'est bien plus coûteux.
+#     Sur un entrepôt facturé à la requête, ce fichier coûte de l'argent.
+#
+# Notez aussi la sous-commande : `metadata profile`, pas `metadata ingest`.
+# =====================================================================
+
+source:
+  type: postgres
+  serviceName: ${OMLAB_SERVICE_NAME}
+  serviceConnection:
+    config:
+      type: Postgres
+      username: ${OMLAB_PG_USER}
+      authType:
+        password: ${OMLAB_PG_PASSWORD}
+      hostPort: ${OMLAB_PG_HOST_INTERNAL}:${OMLAB_PG_PORT_INTERNAL}
+      database: ${OMLAB_PG_DB}
+
+  sourceConfig:
+    config:
+      type: Profiler
+
+      # --- Sur quelle fraction des données profiler --------------------
+      # Cette structure a changé deux fois. En 1.13, elle est à DEUX niveaux :
+      # un type d'échantillonnage, puis sa configuration.
+      #
+      #   STATIC  : vous imposez la fraction (ci-dessous)
+      #   DYNAMIC : OpenMetadata choisit tout seul selon la taille de la table
+      #
+      # Les tutoriels plus anciens écrivent `profileSample: 100` à plat, ou
+      # directement sous profileSampleConfig : les deux échouent en 1.13 avec
+      # « Extra parameter ... profileSample ».
+      profileSampleConfig:
+        sampleConfigType: STATIC
+        config:
+          profileSample: 100          # 100 % ici ; descendez à 10 ou 5 sur du volume
+          profileSampleType: PERCENTAGE   # ou ROWS, pour un nombre de lignes fixe
+      randomizedSample: false
+
+      # --- Que calculer ------------------------------------------------
+      computeTableMetrics: true     # nombre de lignes, de colonnes, taille
+      computeColumnMetrics: true    # min/max/nulls/distincts par colonne
+      useStatistics: false          # true = lire les stats du SGBD au lieu de
+                                    # requêter. Bien plus rapide, moins précis.
+
+      # Attention : le profiler ignore les vues PAR DÉFAUT (contrairement au
+      # workflow de métadonnées). Il faut le demander explicitement.
+      includeViews: true
+
+      # --- Portée ------------------------------------------------------
+      schemaFilterPattern:
+        includes:
+          - "^raw$"
+          - "^analytics$"
+
+      # Exemple : on refuse de profiler la table RH (données sensibles).
+      # Commentez ces trois lignes pour comparer avec/sans.
+      tableFilterPattern:
+        excludes:
+          - "^employees$"
+
+      # Nombre de threads utilisés pour profiler en parallèle
+      threadCount: 5
+
+      # Délai au-delà duquel on abandonne une table (secondes)
+      timeoutSeconds: 43200
+
+processor:
+  # C'est ce processeur qui calcule réellement les métriques
+  type: orm-profiler
+  config: {}
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}
