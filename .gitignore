@@ -1,0 +1,13 @@
+# Secrets et fichiers rendus
+.env
+tmp/
+
+# Volume créé par le compose OpenMetadata (données de la base interne)
+docker/docker-volume/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+*.log

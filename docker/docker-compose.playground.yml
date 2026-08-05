@@ -1,0 +1,86 @@
+# =====================================================================
+# omlab — le "terrain de jeu" que l'on va cataloguer
+# =====================================================================
+# Ce fichier est TOUJOURS utilisé en complément de docker-compose.openmetadata.yml :
+#
+#   docker compose -p omlab \
+#     -f docker/docker-compose.openmetadata.yml \
+#     -f docker/docker-compose.playground.yml up -d
+#
+# (le Makefile fait ça pour vous)
+#
+# Pourquoi le même projet compose ? Pour que ces conteneurs rejoignent le
+# réseau `app_net` d'OpenMetadata, et donc que le conteneur d'ingestion
+# puisse joindre la base sous le nom d'hôte `omlab-postgres`.
+# =====================================================================
+
+services:
+
+  # -------------------------------------------------------------------
+  # La base à cataloguer.
+  # Exposée sur 5433 côté hôte : 5432 est déjà pris par la base interne
+  # d'OpenMetadata. Depuis les autres conteneurs, c'est omlab-postgres:5432.
+  # -------------------------------------------------------------------
+  omlab-postgres:
+    container_name: omlab_postgres
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: omlab
+      POSTGRES_PASSWORD: omlab_pwd
+      POSTGRES_DB: omlab
+    # pg_stat_statements est indispensable aux workflows "usage" et "lineage"
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - pg_stat_statements.max=10000
+      - -c
+      - pg_stat_statements.track=all
+    ports:
+      - "5433:5432"
+    volumes:
+      # Les scripts de ce dossier sont joués UNE SEULE FOIS, à la création
+      # du volume, dans l'ordre alphabétique (01, 02, 03, 04).
+      - ./seed:/docker-entrypoint-initdb.d:ro
+      - omlab-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U omlab -d omlab"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app_net
+
+  # -------------------------------------------------------------------
+  # Récepteur de webhooks, utilisé au chapitre 12 (alertes).
+  # Vu depuis le serveur OpenMetadata : http://omlab-webhook:8000/hook
+  # Vu depuis votre navigateur         : http://localhost:8010/events
+  # (8010 côté hôte, 8000 dans le conteneur : le port 8000 est souvent déjà
+  #  pris sur un poste de développement)
+  # -------------------------------------------------------------------
+  omlab-webhook:
+    container_name: omlab_webhook
+    image: python:3.12-alpine
+    restart: always
+    working_dir: /omlab
+    command: ["python", "-u", "/omlab/scripts/webhook_server.py"]
+    ports:
+      - "${OMLAB_WEBHOOK_PORT:-8010}:8000"
+    volumes:
+      - ../:/omlab
+    networks:
+      - app_net
+
+  # -------------------------------------------------------------------
+  # Surcharge du conteneur d'ingestion fourni par OpenMetadata :
+  # on y monte ce dépôt pour pouvoir lancer les TP dedans, sans avoir à
+  # installer les 100+ connecteurs Python sur la machine hôte.
+  # -------------------------------------------------------------------
+  ingestion:
+    volumes:
+      - ../:/omlab
+
+volumes:
+  omlab-pgdata:
