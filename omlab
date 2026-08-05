@@ -1,0 +1,209 @@
+#!/usr/bin/env bash
+# =====================================================================
+# omlab — le pilote du laboratoire OpenMetadata
+# =====================================================================
+# Toutes les commandes du tutoriel passent par ce script.
+#   ./omlab help
+#
+# À exécuter depuis WSL / Linux / macOS (pas depuis PowerShell) : les
+# conteneurs montent des dossiers de ce dépôt, ce qui suppose un chemin
+# natif. Sous Windows, ouvrez un terminal WSL et placez le dépôt dans
+# le système de fichiers Linux (~/Projets/...), pas dans /mnt/c.
+# =====================================================================
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT"
+
+PROJECT=omlab
+OM_COMPOSE="docker/docker-compose.openmetadata.yml"
+PG_COMPOSE="docker/docker-compose.playground.yml"
+
+# Valeurs par défaut, surchargeables dans .env
+OM_HOST="${OM_HOST:-http://localhost:8585}"
+OM_ADMIN_USER="${OM_ADMIN_USER:-admin@open-metadata.org}"
+OM_ADMIN_PASSWORD="${OM_ADMIN_PASSWORD:-admin}"
+[ -f .env ] && set -a && . ./.env && set +a
+
+dc() { docker compose -p "$PROJECT" -f "$OM_COMPOSE" -f "$PG_COMPOSE" "$@"; }
+
+c_ok()   { printf '\033[32m%s\033[0m\n' "$*"; }
+c_warn() { printf '\033[33m%s\033[0m\n' "$*"; }
+c_err()  { printf '\033[31m%s\033[0m\n' "$*" >&2; }
+c_head() { printf '\n\033[1;36m== %s ==\033[0m\n' "$*"; }
+
+# ---------------------------------------------------------------------
+need_docker() {
+  if ! docker info >/dev/null 2>&1; then
+    c_err "Le démon Docker ne répond pas."
+    c_err "Sous Windows : démarrez Docker Desktop, et vérifiez que l'intégration WSL"
+    c_err "est activée pour cette distribution (Settings > Resources > WSL Integration)."
+    exit 1
+  fi
+}
+
+# =====================================================================
+cmd_up() {
+  need_docker
+  c_head "Démarrage de la stack (OpenMetadata 1.13.3 + playground)"
+  c_warn "Au premier lancement, environ 5 Go d'images sont téléchargés. Patience."
+  dc up -d
+  cmd_wait
+}
+
+cmd_wait() {
+  c_head "Attente de la disponibilité d'OpenMetadata"
+  local tries=0
+  until curl -sf "$OM_HOST/api/v1/system/version" >/dev/null 2>&1; do
+    tries=$((tries + 1))
+    if [ "$tries" -gt 120 ]; then
+      c_err "Toujours pas de réponse après 10 minutes. Regardez : ./omlab logs openmetadata-server"
+      exit 1
+    fi
+    printf '.'
+    sleep 5
+  done
+  echo
+  c_ok "OpenMetadata répond : $(curl -s "$OM_HOST/api/v1/system/version")"
+  echo
+  echo "  UI OpenMetadata : $OM_HOST          ($OM_ADMIN_USER / $OM_ADMIN_PASSWORD)"
+  echo "  Airflow         : http://localhost:8080   (admin / admin)"
+  echo "  Playground PG   : localhost:5433          (omlab / omlab_pwd, base omlab)"
+  echo "  Webhook de test : http://localhost:${OMLAB_WEBHOOK_PORT:-8010}/"
+}
+
+cmd_down() {
+  c_head "Arrêt des conteneurs (les données sont conservées)"
+  dc down
+}
+
+cmd_nuke() {
+  c_head "Suppression complète : conteneurs ET volumes"
+  c_warn "Tout ce que vous avez fait dans OpenMetadata sera perdu."
+  read -r -p "Confirmer ? [oui/non] " answer
+  [ "$answer" = "oui" ] || { echo "Annulé."; exit 0; }
+  dc down -v
+  c_ok "Environnement remis à zéro. Relancez ./omlab up"
+}
+
+cmd_status() {
+  need_docker
+  dc ps
+}
+
+cmd_logs() {
+  dc logs -f --tail=100 "${1:-openmetadata-server}"
+}
+
+# ---------------------------------------------------------------------
+# Base de données du playground
+# ---------------------------------------------------------------------
+cmd_psql() {
+  if [ $# -gt 0 ]; then
+    dc exec -T omlab-postgres psql -U omlab -d omlab -v ON_ERROR_STOP=1 -c "$*"
+  else
+    dc exec omlab-postgres psql -U omlab -d omlab
+  fi
+}
+
+cmd_traffic() {
+  c_head "Rejeu du trafic SQL (alimente pg_stat_statements)"
+  dc exec -T omlab-postgres psql -U omlab -d omlab -q -v ON_ERROR_STOP=1 \
+    < docker/traffic.sql > /dev/null
+  local n
+  n=$(dc exec -T omlab-postgres psql -U omlab -d omlab -tAc \
+      "SELECT count(*) FROM pg_stat_statements")
+  c_ok "pg_stat_statements contient maintenant $n requêtes distinctes."
+}
+
+# ---------------------------------------------------------------------
+# Jeton d'authentification
+# ---------------------------------------------------------------------
+cmd_token() {
+  c_head "Récupération du jeton JWT de l'ingestion-bot"
+  python3 scripts/get_token.py
+}
+
+# ---------------------------------------------------------------------
+# Exécution des workflows d'ingestion, dans le conteneur `ingestion`
+# (il embarque déjà tous les connecteurs : rien à installer sur l'hôte)
+# ---------------------------------------------------------------------
+run_workflow() {
+  local subcmd="$1" file="$2" rendered
+  [ -f "$file" ] || { c_err "Fichier introuvable : $file"; exit 1; }
+  # Les YAML versionnés contiennent des ${PLACEHOLDERS} : on les remplit
+  # depuis .env dans un fichier temporaire, pour ne jamais committer de secret.
+  rendered="$(python3 scripts/render_yaml.py "$file")"
+  c_head "metadata $subcmd -c $file"
+  # PYTHONPATH=/omlab : nécessaire au connecteur maison du chapitre 15
+  dc exec -T -e PYTHONPATH=/omlab ingestion metadata "$subcmd" -c "/omlab/$rendered"
+}
+
+cmd_ingest()   { run_workflow ingest   "$1"; }
+cmd_profile()  { run_workflow profile  "$1"; }
+cmd_test()     { run_workflow test     "$1"; }
+cmd_usage()    { run_workflow usage    "$1"; }
+cmd_classify() { run_workflow classify "$1"; }
+cmd_app()      { run_workflow app      "$1"; }
+
+# ---------------------------------------------------------------------
+# Scripts Python (SDK) — également exécutés dans le conteneur d'ingestion
+# ---------------------------------------------------------------------
+cmd_py() {
+  local file="$1"; shift || true
+  [ -f "$file" ] || { c_err "Fichier introuvable : $file"; exit 1; }
+  c_head "python $file"
+  dc exec -T -e PYTHONPATH=/omlab -w /omlab ingestion python "/omlab/$file" "$@"
+}
+
+# ---------------------------------------------------------------------
+# Vérifications de fin de chapitre
+# ---------------------------------------------------------------------
+cmd_check() {
+  cmd_py scripts/check.py "$@"
+}
+
+# =====================================================================
+cmd_help() {
+  cat <<'EOF'
+omlab — laboratoire OpenMetadata
+
+  Cycle de vie
+    ./omlab up                 démarre toute la stack et attend qu'elle réponde
+    ./omlab status             état des conteneurs
+    ./omlab logs [service]     suit les logs (défaut : openmetadata-server)
+    ./omlab down               arrête (les données restent)
+    ./omlab nuke               supprime tout, volumes compris
+
+  Terrain de jeu
+    ./omlab psql               ouvre un psql sur la base omlab
+    ./omlab psql "SELECT 1"    exécute une requête
+    ./omlab traffic            rejoue du trafic SQL (avant usage/lineage)
+
+  OpenMetadata
+    ./omlab token              récupère le JWT de l'ingestion-bot dans .env
+    ./omlab ingest  <fichier.yaml>    workflow de métadonnées / lineage
+    ./omlab profile <fichier.yaml>    workflow de profiling
+    ./omlab test    <fichier.yaml>    workflow de qualité de données
+    ./omlab usage    <fichier.yaml>   workflow d'usage
+    ./omlab classify <fichier.yaml>   échantillonnage + détection de PII
+    ./omlab app      <fichier.yaml>   application interne (réindexation...)
+    ./omlab py       <script.py>      exécute un script du SDK
+
+  Vérifications
+    ./omlab check              lance toutes les vérifications de chapitre
+    ./omlab check 04           lance celle du chapitre 04
+EOF
+}
+
+# =====================================================================
+main() {
+  local cmd="${1:-help}"; shift || true
+  case "$cmd" in
+    up|wait|down|nuke|status|logs|psql|traffic|token|ingest|profile|test|usage|classify|app|py|check|help)
+      "cmd_$cmd" "$@" ;;
+    *) c_err "Commande inconnue : $cmd"; echo; cmd_help; exit 1 ;;
+  esac
+}
+
+main "$@"
