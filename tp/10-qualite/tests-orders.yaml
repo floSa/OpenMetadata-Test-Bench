@@ -1,0 +1,149 @@
+# =====================================================================
+# Chapitre 10 — suite de tests sur raw.orders
+# =====================================================================
+#   ./omlab test tp/10-qualite/tests-orders.yaml
+#
+# ATTENTION : ce fichier DOIT échouer partiellement. C'est le but.
+# Le seed a semé 88 montants négatifs dans raw.orders. Un catalogue qui
+# affiche du vert partout sur des données réelles est un catalogue qui
+# ne teste rien.
+#
+# Particularité de ce workflow : pas de `serviceConnection`. OpenMetadata
+# connaît déjà la connexion (enregistrée au chapitre 04) et la relit côté
+# serveur. On ne redonne donc pas le mot de passe ici.
+# =====================================================================
+
+source:
+  type: postgres
+  serviceName: ${OMLAB_SERVICE_NAME}
+  sourceConfig:
+    config:
+      type: TestSuite
+      # Une suite = une table. Pour en tester trois, trois fichiers (ou une
+      # suite logique multi-tables, cf. exercices du chapitre).
+      entityFullyQualifiedName: ${OMLAB_SERVICE_NAME}.omlab.raw.orders
+
+      # Les tests de colonnes s'appuient sur le même moteur d'échantillonnage
+      # que le profiler, et son défaut est DYNAMIC : OpenMetadata décide seul
+      # de la fraction de lignes lue. Pour un test de conformité, on veut
+      # 100 % des lignes — on l'impose donc explicitement.
+      profileSampleConfig:
+        sampleConfigType: STATIC
+        config:
+          profileSample: 100
+          profileSampleType: PERCENTAGE
+
+processor:
+  type: orm-test-runner
+  config:
+    testCases:
+
+      # ================================================================
+      # PIÈGE MAJEUR — les types numériques
+      # ================================================================
+      # Le réflexe serait d'écrire :
+      #
+      #   - name: orders_amount_positif
+      #     testDefinitionName: columnValuesToBeBetween
+      #     columnName: amount
+      #
+      # ...et d'obtenir :
+      #   « Test case ... of type columnValuesToBeBetween is not compatible
+      #     with column amount of type NUMERIC »
+      #
+      # Parce que amount est un numeric(12,2) Postgres, qu'OpenMetadata
+      # mappe sur le type NUMERIC — or columnValuesToBeBetween ne déclare
+      # supporter que DECIMAL, DOUBLE et INT.
+      #
+      # Sur une colonne NUMERIC, seuls trois tests sont disponibles :
+      #   columnValuesToBeNotNull, columnValuesToBeUnique,
+      #   columnValuesMissingCount
+      # Pour tout le reste : un test SQL libre. D'où la formulation ci-dessous.
+      # ================================================================
+
+      # ================================================================
+      # SECOND PIÈGE — la stratégie ROWS / COUNT
+      # ================================================================
+      # Ces deux mots ne décrivent pas « comment compter », mais CE QUE
+      # VOTRE REQUÊTE DOIT RENVOYER :
+      #
+      #   ROWS  : votre requête renvoie les lignes fautives.
+      #           OpenMetadata les compte lui-même (len(rows)).
+      #   COUNT : votre requête doit renvoyer UN SEUL NOMBRE.
+      #           OpenMetadata prend le premier scalaire (cursor.scalar()).
+      #
+      # Le piège : écrire `SELECT order_id ... WHERE amount < 0` avec
+      # strategy COUNT. Aucune erreur ne remonte — OpenMetadata prend le
+      # PREMIER order_id de la liste et l'utilise comme s'il s'agissait
+      # d'un compte. Sur notre jeu de données, cela affichait « Found 13 »
+      # au lieu de 88. Un résultat faux, plausible, et parfaitement muet.
+      # ================================================================
+
+      # --- Doit ÉCHOUER : 88 lignes ont un montant négatif -------------
+      # Version COUNT : la requête renvoie elle-même le nombre.
+      - name: orders_aucun_montant_negatif
+        testDefinitionName: tableCustomSQLQuery
+        parameterValues:
+          - name: sqlExpression
+            value: "SELECT COUNT(*) FROM raw.orders WHERE amount < 0"
+          - name: strategy
+            value: "COUNT"
+          - name: operator
+            value: "=="
+          - name: threshold
+            value: "0"
+
+      # --- Doit PASSER : la clé étrangère garantit la présence ----------
+      - name: orders_customer_id_non_null
+        testDefinitionName: columnValuesToBeNotNull
+        columnName: customer_id
+
+      # --- Doit PASSER : 3 000 lignes attendues -------------------------
+      - name: orders_volume_attendu
+        testDefinitionName: tableRowCountToBeBetween
+        parameterValues:
+          - name: minValue
+            value: "2500"
+          - name: maxValue
+            value: "3500"
+
+      # --- Doit PASSER : le statut appartient à une liste fermée --------
+      # status est un varchar : les tests de valeurs redeviennent disponibles.
+      - name: orders_statut_dans_liste
+        testDefinitionName: columnValuesToBeInSet
+        columnName: status
+        parameterValues:
+          - name: allowedValues
+            value: "['completed', 'pending', 'cancelled', 'refunded']"
+
+      # --- Règle métier qu'aucun test tout fait ne sait exprimer --------
+      # Aucune commande ne doit précéder l'inscription de son client.
+      # Version ROWS : on renvoie les lignes fautives, OpenMetadata compte.
+      # Avantage sur COUNT : les lignes en faute sont consultables dans l'UI.
+      - name: orders_posterieures_a_inscription
+        testDefinitionName: tableCustomSQLQuery
+        parameterValues:
+          - name: sqlExpression
+            value: >
+              SELECT o.order_id, o.order_date, c.signup_date
+              FROM raw.orders o
+              JOIN raw.customers c ON c.customer_id = o.customer_id
+              WHERE o.order_date < c.signup_date
+          - name: strategy
+            value: "ROWS"
+          - name: operator
+            value: "=="
+          - name: threshold
+            value: "0"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

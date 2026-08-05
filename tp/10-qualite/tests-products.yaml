@@ -1,0 +1,69 @@
+# =====================================================================
+# Chapitre 10 — suite de tests sur raw.products
+# =====================================================================
+#   ./omlab test tp/10-qualite/tests-products.yaml
+#
+# Résultat attendu : 1 échec sur 3. Quatre produits partagent le SKU
+# SKU-00001, alors qu'un SKU est censé identifier un produit.
+# =====================================================================
+
+source:
+  type: postgres
+  serviceName: ${OMLAB_SERVICE_NAME}
+  sourceConfig:
+    config:
+      type: TestSuite
+      entityFullyQualifiedName: ${OMLAB_SERVICE_NAME}.omlab.raw.products
+      profileSampleConfig:
+        sampleConfigType: STATIC
+        config:
+          profileSample: 100
+          profileSampleType: PERCENTAGE
+
+processor:
+  type: orm-test-runner
+  config:
+    testCases:
+
+      # --- Doit ÉCHOUER : SKU-00001 apparaît 5 fois --------------------
+      # Le cas d'école du défaut invisible : la contrainte n'existe pas en
+      # base (le SKU n'est pas la clé primaire), donc rien ne l'empêche.
+      # Seul un test de catalogue le révèle.
+      - name: products_sku_unique
+        testDefinitionName: columnValuesToBeUnique
+        columnName: sku
+
+      # --- Doit PASSER : catégories issues d'un référentiel fermé ------
+      - name: products_categorie_connue
+        testDefinitionName: columnValuesToBeInSet
+        columnName: category
+        parameterValues:
+          - name: allowedValues
+            value: "['Alimentation', 'Hygiène', 'Accessoires', 'Jouets']"
+
+      # --- Doit PASSER : aucun prix nul ou négatif ---------------------
+      # unit_price est un numeric(10,2) : comme pour orders.amount, les
+      # tests de bornes ne sont pas disponibles. On passe par du SQL.
+      - name: products_prix_strictement_positif
+        testDefinitionName: tableCustomSQLQuery
+        parameterValues:
+          - name: sqlExpression
+            value: "SELECT COUNT(*) FROM raw.products WHERE unit_price <= 0"
+          - name: strategy
+            value: "COUNT"
+          - name: operator
+            value: "=="
+          - name: threshold
+            value: "0"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

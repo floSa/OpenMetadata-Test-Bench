@@ -1,0 +1,68 @@
+# =====================================================================
+# Chapitre 10 — suite de tests sur raw.customers
+# =====================================================================
+#   ./omlab test tp/10-qualite/tests-customers.yaml
+#
+# Résultat attendu : 2 échecs sur 4. Le seed a laissé 39 pays vides et
+# une douzaine d'e-mails en doublon.
+# =====================================================================
+
+source:
+  type: postgres
+  serviceName: ${OMLAB_SERVICE_NAME}
+  sourceConfig:
+    config:
+      type: TestSuite
+      entityFullyQualifiedName: ${OMLAB_SERVICE_NAME}.omlab.raw.customers
+      profileSampleConfig:
+        sampleConfigType: STATIC
+        config:
+          profileSample: 100
+          profileSampleType: PERCENTAGE
+
+processor:
+  type: orm-test-runner
+  config:
+    testCases:
+
+      # --- Doit ÉCHOUER : 39 clients sans pays -------------------------
+      # Question à se poser avant de « corriger » : est-ce vraiment un
+      # défaut ? Un pays optionnel peut être un choix produit. Un test
+      # qui échoue en permanence sans que personne n'agisse est pire
+      # qu'un test absent : il apprend à ignorer le rouge.
+      - name: customers_pays_renseigne
+        testDefinitionName: columnValuesToBeNotNull
+        columnName: country
+
+      # --- Doit ÉCHOUER : des e-mails partagés -------------------------
+      - name: customers_email_unique
+        testDefinitionName: columnValuesToBeUnique
+        columnName: email
+
+      # --- Doit PASSER : tous les e-mails ont une forme valide ---------
+      # Rappel : les regex de tests s'appliquent aux colonnes VARCHAR.
+      - name: customers_email_bien_forme
+        testDefinitionName: columnValuesToMatchRegex
+        columnName: email
+        parameterValues:
+          - name: regex
+            value: "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+
+      # --- Doit PASSER : le référentiel fait exactement 500 lignes ------
+      - name: customers_volume_exact
+        testDefinitionName: tableRowCountToEqual
+        parameterValues:
+          - name: value
+            value: "500"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}
