@@ -1,0 +1,82 @@
+# =====================================================================
+# Chapitre 08 — échantillonnage et détection automatique de PII
+# =====================================================================
+#   ./omlab classify tp/08-classification/auto-classification.yaml
+#
+# Point d'histoire important : jusqu'à la version 1.5, la génération
+# d'échantillons et la détection de PII étaient des options du PROFILER
+# (`generateSampleData`, `confidence`). Elles ont été extraites dans un
+# workflow à part entière, `AutoClassification`, avec sa propre sous-commande
+# `metadata classify`.
+#
+# Conséquence pratique : tout tutoriel antérieur trouvé sur le web échouera
+# avec « Extra parameter 'generateSampleData' ». C'est le piège n°1 du produit.
+#
+# Ce que fait ce workflow :
+#   1. il prélève un échantillon de lignes dans chaque table ;
+#   2. il analyse les NOMS de colonnes et le CONTENU de l'échantillon ;
+#   3. quand il reconnaît une donnée personnelle, il pose automatiquement
+#      une étiquette PII.Sensitive ou PII.NonSensitive.
+# =====================================================================
+
+source:
+  type: postgres
+  serviceName: ${OMLAB_SERVICE_NAME}
+  serviceConnection:
+    config:
+      type: Postgres
+      username: ${OMLAB_PG_USER}
+      authType:
+        password: ${OMLAB_PG_PASSWORD}
+      hostPort: ${OMLAB_PG_HOST_INTERNAL}:${OMLAB_PG_PORT_INTERNAL}
+      database: ${OMLAB_PG_DB}
+
+  sourceConfig:
+    config:
+      type: AutoClassification
+
+      # --- Échantillon stocké dans le catalogue ------------------------
+      # Très pratique pour comprendre une table d'un coup d'œil...
+      # ...et à manier avec précaution : cet échantillon devient visible
+      # par quiconque a accès à la fiche de la table. Sur raw.employees,
+      # cela revient à exposer des salaires. Voir les exercices du chapitre.
+      storeSampleData: true
+      sampleDataCount: 50
+
+      # --- Détection de PII --------------------------------------------
+      enableAutoClassification: true
+
+      # Seuil de confiance, en pourcentage. En dessous, aucune étiquette
+      # n'est posée. Descendre ce seuil augmente le rappel et les faux
+      # positifs : 80 est un bon compromis de départ.
+      confidence: 80
+
+      # Langue utilisée pour reconnaître les libellés de colonnes
+      classificationLanguage: en
+
+      includeViews: true
+
+      schemaFilterPattern:
+        includes:
+          - "^raw$"
+          - "^analytics$"
+
+# Ce bloc paraît inutile — le workflow construit lui-même ses étapes — mais il
+# est OBLIGATOIRE : le code lit `config.processor.config` sans vérifier qu'il
+# existe. L'omettre donne l'erreur cryptique :
+#   Error initializing metadata: 'NoneType' object has no attribute 'model_dump'
+processor:
+  type: orm-profiler
+  config: {}
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}
