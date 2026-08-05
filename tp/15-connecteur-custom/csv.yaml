@@ -1,0 +1,46 @@
+# =====================================================================
+# Chapitre 15 — faire tourner un connecteur maison
+# =====================================================================
+#   ./omlab ingest tp/15-connecteur-custom/csv.yaml
+#
+# Le code du connecteur est dans lib/csv_connector.py.
+#
+# Deux conditions pour qu'OpenMetadata trouve votre classe :
+#   1. elle doit être IMPORTABLE depuis le conteneur d'ingestion.
+#      Ici, le dépôt est monté sur /omlab et PYTHONPATH=/omlab est posé
+#      par le script ./omlab. D'où le chemin lib.csv_connector.
+#   2. le module ne doit pas contenir de tiret dans son chemin : c'est
+#      pour cette raison que le connecteur vit dans lib/ et non dans
+#      tp/15-connecteur-custom/ (un tiret casse l'import Python).
+# =====================================================================
+
+source:
+  type: customDatabase
+  serviceName: omlab_fichiers
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: lib.csv_connector.CsvFolderSource
+
+      # Tout ce que votre connecteur a besoin de savoir passe par ici,
+      # sous forme de dictionnaire libre. C'est volontairement non typé :
+      # à vous de valider ce que vous recevez.
+      connectionOptions:
+        directory: /omlab/tp/15-connecteur-custom/donnees
+        databaseName: exports
+
+  sourceConfig:
+    config:
+      type: DatabaseMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

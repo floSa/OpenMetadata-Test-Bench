@@ -1,0 +1,4 @@
+code_remise,taux,actif
+BIENVENUE10,0.10,true
+FIDELITE,0.05,true
+BLACKFRIDAY,0.30,false
