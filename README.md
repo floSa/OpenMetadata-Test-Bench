@@ -1,16 +1,68 @@
 # OpenMetadata — tutoriel complet et exécutable
 
-Un cours en 16 chapitres pour apprendre **tout ce que propose OpenMetadata**,
-avec un laboratoire Docker complet pour tout essayer immédiatement : une
-instance OpenMetadata 1.13.3, un entrepôt Postgres « terrain de jeu » peuplé
-de données réalistes — **défauts compris** — et un TP exécutable par chapitre.
+**Un cours en 16 chapitres pour apprendre tout ce que propose OpenMetadata, avec un laboratoire Docker complet pour tout essayer immédiatement.**
 
-Chaque commande de ce dépôt a été exécutée pour de vrai. Les sorties reproduites
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![OpenMetadata](https://img.shields.io/badge/OpenMetadata-1.13.3-6B46F6)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+
+Une instance OpenMetadata 1.13.3, un entrepôt Postgres « terrain de jeu » peuplé
+de données réalistes — **défauts compris** —, et un TP exécutable par chapitre.
+Chaque commande de ce dépôt a été exécutée pour de vrai : les sorties reproduites
 dans les chapitres sont celles que vous obtiendrez.
 
----
+## Sommaire
 
-## Démarrage en cinq minutes
+- [Architecture](#architecture)
+- [Démarrage](#démarrage)
+- [Configuration](#configuration)
+- [API / Endpoints](#api--endpoints)
+- [Tests](#tests)
+- [Structure du projet](#structure-du-projet)
+- [Licences & composants](#licences--composants)
+- [Le parcours](#le-parcours)
+- [Commandes utiles](#commandes-utiles)
+- [Données du terrain de jeu](#données-du-terrain-de-jeu)
+- [Les pièges que ce tutoriel documente](#les-pièges-que-ce-tutoriel-documente)
+- [Versions](#versions)
+- [Ressources](#ressources)
+
+## Architecture
+
+Le laboratoire empile deux fichiers compose Docker sur le même réseau `app_net`.
+
+| Service | Image | Rôle |
+|---|---|---|
+| `openmetadata-server` | `docker.getcollate.io/openmetadata/server:1.13.3` | Catalogue, UI, API REST |
+| `postgresql` | `docker.getcollate.io/openmetadata/postgresql:1.13.3` | Base interne d'OpenMetadata |
+| `elasticsearch` | `docker.elastic.co/elasticsearch/elasticsearch:9.3.0` | Index de recherche du catalogue |
+| `ingestion` (Airflow) | fourni par OpenMetadata, ce dépôt monté en volume | Exécute les workflows d'ingestion, de profiling, de tests |
+| `omlab-postgres` | `postgres:16-alpine` | Terrain de jeu à cataloguer — l'entrepôt retail avec ses défauts |
+| `omlab-webhook` | `python:3.12-alpine` | Récepteur de webhooks du chapitre 12 |
+
+```mermaid
+flowchart LR
+  subgraph stack_om["docker-compose.openmetadata.yml"]
+    server[openmetadata-server] --> pg_om[(postgresql)]
+    server --> es[(elasticsearch)]
+    ingestion[ingestion / Airflow] -->|TP montés en volume| server
+  end
+  subgraph stack_play["docker-compose.playground.yml"]
+    pg_play[(omlab-postgres)]
+    webhook[omlab-webhook]
+  end
+  ingestion -->|scan, profiling, tests| pg_play
+  server -->|alertes chap. 12| webhook
+```
+
+Les deux composes partagent le réseau `app_net` : c'est ce qui permet au conteneur
+d'ingestion de joindre `omlab-postgres` par son nom d'hôte plutôt que par une IP.
+
+## Démarrage
+
+**Prérequis :** Docker ≥ 20.10 avec 6 Gio de RAM et 4 vCPU alloués, environ
+15 Go de disque.
 
 > **Sous Windows :** travaillez depuis un terminal **WSL**, avec le dépôt dans
 > le système de fichiers Linux (`~/Projets/...`). Voir le [chapitre 02](cours/02-installation-architecture.md).
@@ -21,14 +73,12 @@ cp .env.example .env
 ./omlab token
 ```
 
-```
-OpenMetadata répond : {"version":"1.13.3",...}
-
-  UI OpenMetadata : http://localhost:8585   (admin@open-metadata.org / admin)
-  Airflow         : http://localhost:8080   (admin / admin)
-  Playground PG   : localhost:5433          (omlab / omlab_pwd, base omlab)
-  Webhook de test : http://localhost:8010/
-```
+| Service | URL | Note |
+|---|---|---|
+| UI OpenMetadata | http://localhost:8585 | `admin@open-metadata.org` / `admin` |
+| Airflow | http://localhost:8080 | `admin` / `admin` |
+| Playground Postgres | localhost:5433 | `omlab` / `omlab_pwd`, base `omlab` |
+| Webhook de test | http://localhost:8010/ | reçoit les alertes du chapitre 12 |
 
 Puis remplissez le catalogue :
 
@@ -38,10 +88,87 @@ Puis remplissez le catalogue :
 
 Et commencez par le [chapitre 01](cours/01-panorama.md).
 
-**Prérequis :** Docker ≥ 20.10 avec 6 Gio de RAM et 4 vCPU alloués, environ
-15 Go de disque.
+## Configuration
 
----
+Variables définies dans [.env.example](.env.example) :
+
+| Variable | Défaut | Effet |
+|---|---|---|
+| `OM_HOST` | `http://localhost:8585` | URL d'OpenMetadata vue depuis l'hôte |
+| `OM_HOST_INTERNAL` | `http://openmetadata-server:8585` | URL vue depuis les conteneurs |
+| `OM_ADMIN_USER` / `OM_ADMIN_PASSWORD` | `admin@open-metadata.org` / `admin` | Identifiants admin par défaut |
+| `OM_BOT_NAME` | `ingestion-bot` | Bot dont `./omlab token` récupère le jeton |
+| `OM_TOKEN` | *(vide)* | Rempli par `./omlab token`, jamais committé |
+| `OMLAB_WEBHOOK_PORT` | `8010` | Port hôte du récepteur de webhooks (chapitre 12) |
+| `OMLAB_PG_HOST` / `OMLAB_PG_PORT` | `localhost` / `5433` | Accès au terrain de jeu depuis l'hôte |
+| `OMLAB_PG_HOST_INTERNAL` / `OMLAB_PG_PORT_INTERNAL` | `omlab-postgres` / `5432` | Accès depuis les conteneurs (vu par l'ingestion) |
+| `OMLAB_PG_DB` / `OMLAB_PG_USER` / `OMLAB_PG_PASSWORD` | `omlab` / `om_reader` / `om_reader_pwd` | Connexion utilisée par les workflows d'ingestion |
+| `OMLAB_SERVICE_NAME` | `omlab_postgres` | Nom du service tel qu'il apparaît dans OpenMetadata — recopié en dur dans les YAML de `tp/` |
+
+Le fichier `.env` (jeton, mots de passe) n'est **pas versionné**. Les YAML de
+TP ne contiennent que des `${PLACEHOLDERS}` : `./omlab ingest` produit la
+version remplie dans `tmp/`, également ignoré par git.
+
+## API / Endpoints
+
+Le récepteur de webhooks du chapitre 12 ([scripts/webhook_server.py](scripts/webhook_server.py)),
+sans dépendance, exposé sur `omlab-webhook` :
+
+| Méthode | Route | Rôle |
+|---|---|---|
+| `POST` | `/hook` | Reçoit un événement d'alerte OpenMetadata et le journalise |
+| `GET` | `/events` | Liste les événements reçus (JSON) |
+| `GET` | `/` | Page de lecture humaine des événements reçus |
+
+## Tests
+
+```bash
+./omlab check              # toutes les vérifications de chapitre
+./omlab check 04           # seulement le chapitre 04
+```
+
+```
+Chapitre 04 — Ingestion des métadonnées : 3/3 — tout est bon
+Chapitre 05 — Profiling : 2/2 — tout est bon
+Chapitre 06 — Usage et lineage automatique : 3/3 — tout est bon
+Chapitre 07 — Glossaire : 3/3 — tout est bon
+Chapitre 08 — Classification et PII : 2/2 — tout est bon
+Chapitre 09 — Équipes, rôles, politiques : 5/5 — tout est bon
+Chapitre 10 — Qualité de données : 6/6 — tout est bon
+Chapitre 11 — Lineage manuel : 1/1 — tout est bon
+Chapitre 12 — Alertes : 1/1 — tout est bon
+Chapitre 14 — SDK Python : 3/3 — tout est bon
+Chapitre 15 — Connecteur maison : 2/2 — tout est bon
+Chapitre 16 — Contrat de données : 1/1 — tout est bon
+```
+
+Un chapitre non encore fait apparaît en échec : c'est votre liste de courses.
+
+## Structure du projet
+
+```text
+openmetadata-tuto/
+├── omlab                  # CLI bash : point d'entrée de toutes les commandes
+├── .env.example
+├── cours/                 # les 16 chapitres
+├── tp/                    # un dossier par chapitre : YAML d'ingestion, scripts Python
+├── lib/                   # om.py (client partagé), csv_connector.py (chapitre 15)
+├── scripts/               # get_token.py, check.py, webhook_server.py, render_yaml.py
+├── docker/                # les deux fichiers compose et le seed SQL du playground
+└── README.md
+```
+
+## Licences & composants
+
+| Composant | Rôle | Licence |
+|---|---|---|
+| OpenMetadata | Catalogue, UI, API, connecteurs d'ingestion | Apache License 2.0 |
+| Elasticsearch | Index de recherche du catalogue | Elastic License v2 (SSPL ou AGPLv3 au choix côté code source) |
+| PostgreSQL | Base interne d'OpenMetadata + terrain de jeu | PostgreSQL License |
+| Apache Airflow | Orchestrateur des workflows d'ingestion | Apache License 2.0 |
+| Python | Scripts des TP et récepteur de webhooks | PSF License |
+| Docker Compose | Orchestration des conteneurs | Apache License 2.0 |
+| **Ce projet** | Cours, TP, laboratoire, scripts | MIT — Copyright (c) 2026 floSa |
 
 ## Le parcours
 
@@ -93,11 +220,7 @@ Et commencez par le [chapitre 01](cours/01-panorama.md).
 - *Gouvernance / data steward* : 01 → 03 → 07 → 08 → 09 → 10 → 16
 - *Complet* : dans l'ordre, environ 12 heures avec les exercices
 
----
-
-## Le laboratoire
-
-### Les commandes
+## Commandes utiles
 
 ```
 Cycle de vie
@@ -126,7 +249,7 @@ Vérifications
   ./omlab check 04           seulement le chapitre 04
 ```
 
-### Les données du terrain de jeu
+## Données du terrain de jeu
 
 Un mini-entrepôt retail dans `omlab-postgres`, conçu pour que chaque chapitre
 ait de quoi mordre :
@@ -144,49 +267,6 @@ analytics.v_revenue_monthly, analytics.v_customer_360 vues → lineage garanti
 **Ces défauts sont volontaires.** Ils font échouer les tests du chapitre 10
 pour de vraies raisons — un catalogue tout au vert sur des données réelles
 n'apprend rien.
-
-### Organisation du dépôt
-
-```
-cours/       les 16 chapitres
-tp/          un dossier par chapitre : YAML d'ingestion, scripts Python
-lib/         om.py (client partagé), csv_connector.py (chapitre 15)
-scripts/     get_token.py, check.py, webhook_server.py, render_yaml.py
-docker/      les deux fichiers compose et le seed SQL du playground
-```
-
-### Les secrets
-
-Le fichier `.env` (jeton, mots de passe) n'est **pas versionné**. Les YAML de
-TP ne contiennent que des `${PLACEHOLDERS}` : `./omlab ingest` produit la
-version remplie dans `tmp/`, également ignoré par git.
-
----
-
-## Vérifier son avancement
-
-```bash
-./omlab check
-```
-
-```
-Chapitre 04 — Ingestion des métadonnées : 3/3 — tout est bon
-Chapitre 05 — Profiling : 2/2 — tout est bon
-Chapitre 06 — Usage et lineage automatique : 3/3 — tout est bon
-Chapitre 07 — Glossaire : 3/3 — tout est bon
-Chapitre 08 — Classification et PII : 2/2 — tout est bon
-Chapitre 09 — Équipes, rôles, politiques : 5/5 — tout est bon
-Chapitre 10 — Qualité de données : 6/6 — tout est bon
-Chapitre 11 — Lineage manuel : 1/1 — tout est bon
-Chapitre 12 — Alertes : 1/1 — tout est bon
-Chapitre 14 — SDK Python : 3/3 — tout est bon
-Chapitre 15 — Connecteur maison : 2/2 — tout est bon
-Chapitre 16 — Contrat de données : 1/1 — tout est bon
-```
-
-Un chapitre non encore fait apparaît en échec : c'est votre liste de courses.
-
----
 
 ## Les pièges que ce tutoriel documente
 
@@ -215,8 +295,6 @@ demi-heure quand on le découvre seul.
 | 17 | `?fields=columns` renvoie les colonnes **sans** leurs étiquettes | 13 |
 | 18 | Un connecteur maison doit créer son service lui-même, sinon 100 % de succès et zéro écriture | 15 |
 
----
-
 ## Versions
 
 | Composant | Version |
@@ -227,7 +305,7 @@ demi-heure quand on le découvre seul.
 | Postgres (playground) | 16-alpine |
 
 **Changer de version :** modifiez le tag dans
-`docker/docker-compose.openmetadata.yml`, ou remplacez le fichier par l'asset
+[docker/docker-compose.openmetadata.yml](docker/docker-compose.openmetadata.yml), ou remplacez le fichier par l'asset
 de la version voulue :
 
 ```bash
@@ -237,8 +315,6 @@ curl -sL -o docker/docker-compose.openmetadata.yml \
 
 Attendez-vous à des ajustements : plusieurs pièges listés ci-dessus viennent
 précisément de changements de schéma entre versions mineures.
-
----
 
 ## Ressources
 
