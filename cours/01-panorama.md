@@ -176,7 +176,7 @@ ni la même fiabilité :
 
 ## Pour aller plus loin
 
-- [Modèle d'entités](https://docs.open-metadata.org/v2.0.x/main-concepts/metadata-standard/schemas)
+- [Modèle d'entités](https://docs.open-metadata.org/v2.0.x/main-concepts/metadata-standard)
 - [Liste des connecteurs](https://docs.open-metadata.org/v2.0.x/connectors)
 
 ---

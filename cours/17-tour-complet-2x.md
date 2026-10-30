@@ -367,6 +367,7 @@ presque vides.
 
 ## Pour aller plus loin
 
+- [Liste officielle des fonctions](https://docs.open-metadata.org/v2.0.x/features)
 - [Notes de version 2.0](https://docs.open-metadata.org/v2.0.x/releases/2.0-release)
 - [Ruptures de compatibilité](https://docs.open-metadata.org/v2.0.x/deployment/upgrade/breaking-changes/overview)
 

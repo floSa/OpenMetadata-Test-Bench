@@ -254,7 +254,7 @@ découvrir un endpoint.
 ## Pour aller plus loin
 
 - Swagger de votre instance : http://localhost:8585/docs
-- [Référence de l'API](https://docs.open-metadata.org/swagger.html)
+- [Référence de l'API](https://docs.open-metadata.org/v2.0.x/api-reference)
 
 ---
 

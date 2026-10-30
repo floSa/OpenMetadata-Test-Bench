@@ -271,7 +271,7 @@ avez compris :
 
 ## Pour aller plus loin
 
-- [Contrats de données](https://docs.open-metadata.org/v2.0.x/how-to-guides/data-governance/data-contracts)
+- [Contrats de données](https://docs.open-metadata.org/v2.0.x/how-to-guides/data-contracts)
 - [Sauvegarde et restauration](https://docs.open-metadata.org/v2.0.x/deployment/backup-restore-metadata)
 - [Montée de version](https://docs.open-metadata.org/v2.0.x/deployment/upgrade)
 
