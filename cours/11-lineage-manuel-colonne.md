@@ -111,12 +111,27 @@ curl -s -H "Authorization: Bearer $OM_TOKEN" \
   | jq '.nodes[].fullyQualifiedName'
 ```
 
-Dans l'UI, le bouton **Impact Analysis** de l'onglet Lineage fait la même
-chose visuellement, et affiche aussi les tableaux de bord et pipelines en
+Dans l'UI, la sous-vue **Impact Analysis** de l'onglet Lineage (voir le
+[chapitre 06](06-usage-lineage-auto.md)) fait la même chose, et affiche aussi les tableaux de bord et pipelines en
 aval — pas seulement les tables.
 
 Le réflexe à prendre : **avant toute migration, on regarde l'aval**. Cinq
 minutes de graphe évitent la réunion de crise du lendemain.
+
+## Mode d'emploi : inspecter et modifier une arête
+
+**Le graphe.** Ouvrez `analytics.fct_orders`, onglet **Lineage**. Le crayon **(1)** fait
+passer en mode édition : on peut alors glisser une entité sur le graphe et relier deux
+nœuds.
+
+![Le lineage de fct_orders et le bouton d'édition](img/11-lineage-fct-orders.png)
+
+**Lire une arête.** Cliquez sur le milieu de l'arête qui va de `orders` à `fct_orders`.
+Le panneau **Edge Information** affiche sa description, sa source, sa cible et sa
+requête SQL. Le champ **Source of Lineage** vaut ici `Manual` : c'est la preuve que
+votre correction est bien en place.
+
+![Le panneau d'une arête manuelle](img/11-arete-manuelle.png)
 
 ---
 
@@ -126,9 +141,9 @@ minutes de graphe évitent la réunion de crise du lendemain.
 ./omlab py tp/11-lineage/lineage_manuel.py
 ```
 
-1. Dans l'UI, ouvrez `analytics.fct_orders`, onglet **Lineage**. L'arête depuis
-   `raw.orders` est marquée manuelle.
-2. Activez la vue colonne à colonne et suivez `amount → is_credit_note`.
+1. Dans l'UI, ouvrez `analytics.fct_orders`, onglet **Lineage**, et cliquez sur
+   l'arête depuis `raw.orders` : **Source of Lineage** vaut `Manual`.
+2. Cliquez sur **Layers → Column** et suivez `amount → is_credit_note`.
 3. Cliquez sur l'arête : la requête SQL et la description s'affichent.
 4. **Vérifiez que le manuel résiste** :
    ```bash
@@ -137,8 +152,8 @@ minutes de graphe évitent la réunion de crise du lendemain.
    ./omlab py tp/11-lineage/lineage_manuel.py
    ```
    L'arête est toujours `Manual`.
-5. Ajoutez une arête entièrement à la main depuis l'UI : bouton **Edit** de
-   l'onglet Lineage, puis glissez une entité.
+5. Ajoutez une arête entièrement à la main depuis l'UI : crayon de l'onglet
+   Lineage, puis glissez une entité.
 
 **Vérifier :**
 

@@ -142,6 +142,32 @@ Et surtout : **filtrer par criticité**. Une alerte sur les 4 000 tables du
 catalogue est un bruit de fond ; une alerte sur les 30 tables Tier1 est un
 signal.
 
+## Mode d'emploi : retrouver ses alertes
+
+Les deux alertes du TP ne sont **pas au même endroit**, parce qu'elles n'ont pas le
+même `alertType`.
+
+**Les alertes `Observability`.** Dans le menu **Observability (1)**, cliquez sur
+**Alerts** : `omlab_tests_en_echec` y apparaît sous son titre **(2)**.
+
+![La liste des alertes d'observabilité](img/12-alertes-observabilite.png)
+
+**Le détail d'une alerte.** Cliquez sur son titre. L'onglet **Configuration** montre la
+source et la destination, **Recent Events** ce qui a été envoyé. Le crayon en haut de
+page ouvre l'édition, c'est-à-dire l'ajout de filtres et de destinations.
+
+![Le détail de l'alerte Tests de qualité en échec](img/12-alerte-detail.png)
+
+**Les alertes `Notification`.** *Settings → Notifications* contient l'autre,
+`omlab_tables_modifiees` **(1)**, à côté des *Activity Feed Alerts* fournies d'origine.
+
+![La liste des notifications](img/12-notifications.png)
+
+**Le récepteur.** http://localhost:8010/ affiche les charges utiles reçues, les plus
+récentes d'abord.
+
+![Le récepteur de webhooks du labo](img/12-webhook.png)
+
 ---
 
 ## TP guidé
@@ -154,10 +180,11 @@ signal.
 
 1. Ouvrez http://localhost:8010/ dans votre navigateur : la charge utile
    complète y est affichée en JSON.
-2. Dans l'UI : **Settings → Alerts**, ouvrez `omlab_tests_en_echec` et regardez
-   comment le serveur a traduit votre `input` en `filteringRules`.
-3. **Ajoutez un filtre depuis l'UI** pour ne garder que les tests au statut
-   `Failed`. Relancez la suite et comptez les événements reçus.
+2. Dans l'UI : **Observability → Alerts**, ouvrez `omlab_tests_en_echec`. Pour
+   voir comment le serveur a traduit votre `input`, lisez `filteringRules` par
+   l'API : `GET /api/v1/events/subscriptions/name/omlab_tests_en_echec`.
+3. **Ajoutez un filtre depuis l'UI** (crayon de l'alerte) pour ne garder que les
+   tests au statut `Failed`. Relancez la suite et comptez les événements reçus.
 4. Ajoutez une seconde destination de type `Owners`.
 5. Videz le récepteur : http://localhost:8010/reset
 

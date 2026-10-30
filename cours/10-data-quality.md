@@ -203,7 +203,8 @@ Un incident résolu demande une **cause** : donnée réellement erronée, test m
 calibré, faux positif. C'est ce qui distingue un outil de qualité d'un simple
 tableau de bord rouge : la trace de ce qu'on a décidé.
 
-Dans l'UI : **Data Quality → Incidents**, ou l'onglet correspondant sur la table.
+Dans l'UI : **Observability → Incident Manager**, ou la sous-vue **Incidents** de
+l'onglet **Data Observability** de la table.
 
 Question à se poser sur `customers_pays_renseigne` : 39 pays manquants, est-ce
 un *défaut* ou une *règle métier* ? Si le pays est optionnel à l'inscription,
@@ -223,6 +224,36 @@ a son propre calendrier. Trois régimes qui fonctionnent bien :
 Le coût est celui de vos requêtes : un test de complétude sur une table de
 2 milliards de lignes n'est pas gratuit.
 
+## Mode d'emploi : suivre la qualité et traiter un incident
+
+**La vue d'ensemble.** Dans le menu **Observability (1)**, cliquez sur **Data Quality**,
+puis sur l'onglet **Test Cases (2)**. Les compteurs montrent 12 tests, dont 5 en échec,
+et le tableau donne la raison de chaque échec.
+
+![La vue d'ensemble de la qualité](img/10-vue-qualite.png)
+
+**Depuis une table.** Sur `raw.orders`, l'onglet **Data Observability (1)** propose la
+sous-vue **Data Quality (2)** pour ses tests et **Incidents (3)** pour ses incidents.
+
+![Les tests de raw.orders](img/10-table-qualite.png)
+
+**Le détail d'un test.** Cliquez sur `orders_aucun_montant_negatif` : la page donne les
+paramètres, le SQL exécuté et la courbe des résultats. On y lit le `COUNT` et les 88
+lignes du piège n°2.
+
+![Le détail du test orders_aucun_montant_negatif](img/10-resultat-test.png)
+
+**Prendre l'incident en charge.** **Observability → Incident Manager** liste les
+incidents ouverts. Repérez la ligne de votre test **(1)**.
+
+![Le gestionnaire d'incidents](img/10-incidents.png)
+
+**Changer son statut.** Cliquez sur le statut `New` de la ligne : le menu propose
+`Ack`, `Assigned` et `Resolved`, les états du cycle de vie décrit plus haut. La colonne
+**Assignee** désigne le responsable.
+
+![Le menu de statut d'un incident](img/10-incident-statut.png)
+
 ---
 
 ## TP guidé
@@ -233,7 +264,7 @@ Le coût est celui de vos requêtes : un test de complétude sur une table de
 ./omlab test tp/10-qualite/tests-products.yaml
 ```
 
-1. Dans l'UI : **Data Quality**, vue d'ensemble des douze tests.
+1. Dans l'UI : **Observability → Data Quality**, vue d'ensemble des douze tests.
 2. Ouvrez `raw.orders`, onglet Data Observability, et lisez le détail de
    `orders_aucun_montant_negatif`.
 3. Ouvrez l'incident correspondant, passez-le en `Ack` puis assignez-le à
