@@ -82,14 +82,14 @@ raw.customers
     email            PII.Sensitive
     first_name       PII.Sensitive
     last_name        PII.Sensitive
-    country          PII.NonSensitive
     city             PII.NonSensitive
     signup_date      PII.NonSensitive
 raw.employees
     full_name        PII.Sensitive
+    phone            PII.NonSensitive
     hired_at         PII.NonSensitive
-raw.products
-    created_at       PII.NonSensitive
+raw.orders
+    order_date       PII.NonSensitive
 ```
 
 Regardez `raw.employees` de près. Cette table contient :
@@ -98,14 +98,18 @@ Regardez `raw.employees` de près. Cette table contient :
 |---|---|---|
 | `full_name` | « Camille Martin » | ✅ Sensitive |
 | `email` | `prenom.nom42@omlab.internal` | ❌ **rien** |
-| `phone` | `+33 6 37 71 29 13` | ❌ **rien** |
+| `phone` | `+33 6 37 71 29 13` | ❌ **`NonSensitive`**, soit pire que rien |
 | `national_id` | `1000091760000` | ❌ **rien** |
 | `salary` | `48231.00` | ❌ rien (et c'est discutable) |
 
 **Le numéro de sécurité sociale n'est pas détecté.** L'e-mail non plus, alors
-qu'il l'est sur `raw.customers`. Et à l'inverse, `raw.products.created_at` —
-une date de création de produit, qui n'a rien de personnel — est étiquetée
-`PII.NonSensitive`.
+qu'il l'est sur `raw.customers`. Le téléphone d'un salarié est classé comme
+**non sensible**. Et à l'inverse, `raw.orders.order_date` — une date de commande,
+qui n'a rien de personnel — reçoit une étiquette PII.
+
+Le résultat change aussi d'une version à l'autre : la 1.13.3 laissait `phone` sans
+étiquette et marquait `raw.products.created_at`, ce que la 1.13.6 ne fait plus. Il
+reste stable d'une exécution à l'autre, mais une montée de version impose de relire.
 
 C'est le message central de ce chapitre :
 
@@ -153,13 +157,38 @@ en ont le droit.
 
 ## 5. Corriger à la main
 
-L'auto-classification pose des étiquettes de type `Automated`. Une correction
+L'auto-classification pose des étiquettes de type `Generated`. Une correction
 humaine pose une étiquette `Manual`, qui **prime** et survit aux exécutions
 suivantes. Le mode d'emploi est donc :
 
 1. laisser la machine débroussailler ;
 2. relire, corriger, compléter ;
 3. considérer que seul ce qui a été relu fait foi.
+
+## Mode d'emploi : relire et corriger
+
+**Lire le résultat.** Sur `raw.customers`, la colonne **Tags** du tableau montre les
+étiquettes posées. `email` **(1)** a bien reçu `Sensitive`.
+
+![Les étiquettes PII de raw.customers](img/08-pii-customers.png)
+
+**Repérer ce qui manque.** La même vue sur `raw.employees` est plus instructive :
+`full_name` **(1)** est correct, `email` **(2)** et `national_id` **(4)** n'ont rien,
+et `phone` **(3)** est classé `NonSensitive`.
+
+![Les étiquettes PII de raw.employees, avec ses erreurs](img/08-pii-employees.png)
+
+**Poser une étiquette.** Sur la ligne de `national_id`, cliquez sur **+ Add** dans la
+colonne **Tags**, tapez `PII`, cochez **Sensitive** puis validez par **Update**. Pour
+retirer une étiquette, survolez-la et cliquez sur son crayon.
+
+![Le sélecteur d'étiquettes ouvert sur national_id](img/08-poser-etiquette.png)
+
+**Mesurer l'exposition.** L'onglet **Sample Data (1)** montre ce que voit quiconque
+accède à la fiche. Les valeurs affichées ici sont fictives : elles viennent du
+terrain de jeu.
+
+![L'échantillon de raw.employees](img/08-echantillon.png)
 
 ---
 
@@ -171,9 +200,9 @@ suivantes. Le mode d'emploi est donc :
 
 1. Dans l'UI, ouvrez `raw.customers` : les étiquettes PII sont sur les colonnes.
 2. Ouvrez `raw.employees` et constatez que `national_id` n'en a aucune.
-3. **Corrigez-le à la main** : posez `PII.Sensitive` sur `national_id`, `phone`
-   et `email`.
-4. Retirez `PII.NonSensitive` de `raw.products.created_at` — un faux positif
+3. **Corrigez-le à la main** : posez `PII.Sensitive` sur `national_id` et
+   `email`, et remplacez `NonSensitive` par `Sensitive` sur `phone`.
+4. Retirez `PII.NonSensitive` de `raw.orders.order_date` — un faux positif
    qui décrédibilise l'ensemble.
 5. Regardez l'échantillon de `raw.employees` (onglet **Sample Data**) et
    mesurez le problème.

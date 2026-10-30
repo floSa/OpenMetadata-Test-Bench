@@ -63,7 +63,9 @@ Glossaire : Commerce
 
 Glossaire relu : Glossaire Commerce (version 0.1)
   Commerce.Client            synonymes=['Customer', 'Acheteur']
+  Commerce.Commande          synonymes=['Order']
   Commerce.ChiffreAffaires   synonymes=['CA', 'Revenue', 'Revenu']
+  Commerce.Avoir             synonymes=['Credit note']
 ```
 
 Lisez [le script](../tp/07-glossaire/creer_glossaire.py) : les définitions
@@ -88,15 +90,18 @@ document mort.
 ```
 
 ```
-  raw.customers.customer_id        <- Commerce.Client              rattaché
-  raw.orders.amount                <- Commerce.ChiffreAffaires     rattaché
-  analytics.fct_orders.amount      <- Commerce.ChiffreAffaires     rattaché
+  raw.customers.customer_id           <- Commerce.Client           rattaché
+  raw.customers.email                 <- Commerce.Client           rattaché
+  raw.orders.order_id                 <- Commerce.Commande         rattaché
+  raw.orders.amount                   <- Commerce.ChiffreAffaires  rattaché
+  analytics.fct_orders.amount         <- Commerce.ChiffreAffaires  rattaché
+  analytics.fct_orders.is_credit_note <- Commerce.Avoir            rattaché
   analytics.v_revenue_monthly.revenue <- Commerce.ChiffreAffaires  rattaché
 
 Assets portant le terme Commerce.ChiffreAffaires :
   omlab_postgres.omlab.raw.orders
-  omlab_postgres.omlab.analytics.fct_orders
   omlab_postgres.omlab.analytics.v_revenue_monthly
+  omlab_postgres.omlab.analytics.fct_orders
 ```
 
 La relation est **bidirectionnelle**. Depuis une colonne, on lit la définition ;
@@ -132,6 +137,36 @@ C'est le mécanisme qui empêche le glossaire de devenir un dépotoir où chacun
 ajoute sa définition personnelle. À activer dès qu'il y a plus de trois
 contributeurs.
 
+## Mode d'emploi : le glossaire à l'écran
+
+**Ouvrir le glossaire.** Dans le menu **Govern (1)**, cliquez sur **Glossary**, puis
+sur *Glossaire Commerce*. L'onglet **Terms (2)** liste les termes et leur statut, et
+**Add term (3)** en crée un à la main.
+
+![Le glossaire Commerce et ses quatre termes](img/07-glossaire.png)
+
+**Lire un terme.** Cliquez sur *Chiffre d'affaires*. La fiche donne la définition et
+les **Synonyms (1)**. L'onglet **Assets (2)** fait le lien vers les données.
+
+![La fiche du terme Chiffre d'affaires](img/07-terme.png)
+
+**Voir où vit la notion.** L'onglet **Assets** répond à « où est calculé notre
+chiffre d'affaires ? » : deux tables, une vue et leurs colonnes.
+
+![Les assets portant le terme Chiffre d'affaires](img/07-terme-assets.png)
+
+**Retrouver le terme par un synonyme.** Tapez `CA` dans la barre de recherche **(1)**,
+puis sélectionnez **Glossary Terms** dans l'arbre de gauche : *Chiffre d'affaires*
+remonte, alors que son nom ne contient pas ces lettres dans cet ordre.
+
+![La recherche de CA retrouve le terme par son synonyme](img/07-recherche-synonyme.png)
+
+**Le lire depuis la donnée.** Sur `raw.orders`, le terme figure dans la colonne
+**Glossary Terms** du tableau, en face de `amount` **(1)**. Pour gagner de la place,
+repliez le panneau de droite avec le bouton situé au bout de la ligne d'onglets.
+
+![Le terme affiché sur la colonne amount](img/07-colonne-terme.png)
+
 ---
 
 ## TP guidé
@@ -144,8 +179,8 @@ contributeurs.
 1. Dans l'UI : **Govern → Glossary → Commerce**. Ouvrez `ChiffreAffaires` et
    regardez son onglet **Assets**.
 2. Cherchez `CA` dans la barre de recherche. Le terme remonte par son synonyme.
-3. Ouvrez `raw.orders`, onglet Schema : la colonne `amount` porte désormais le
-   terme, et le survol affiche la définition.
+3. Ouvrez `raw.orders`, onglet **Columns** : la colonne `amount` porte désormais
+   le terme, et le survol affiche la définition.
 4. Ajoutez à la main un terme `PanierMoyen`, enfant de `ChiffreAffaires`, et
    observez son FQN.
 

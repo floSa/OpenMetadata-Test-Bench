@@ -159,6 +159,28 @@ C'est utile à partir d'une certaine taille d'organisation. En dessous,
 équipes + propriétaires suffisent, et ajouter des domaines ne fait
 qu'ajouter de la cérémonie.
 
+## Mode d'emploi : où lire les droits
+
+Tout se trouve sous **Settings**, dans deux tuiles : *Team & User Management* pour les
+équipes et les utilisateurs, *Access Control* pour les rôles et les politiques.
+
+**L'équipe.** *Team & User Management → Teams → Data Platform*. L'onglet **Users (1)**
+liste les membres, **Roles (2)** le rôle attaché à l'équipe.
+
+![L'équipe Data Platform et ses deux membres](img/09-equipe.png)
+
+**Le rôle.** *Access Control → Roles → Data Steward omlab* : un rôle n'est qu'un
+assemblage de politiques, listées dans l'onglet **Policies**.
+
+![Le rôle Data Steward omlab et sa politique](img/09-role.png)
+
+**La politique.** *Access Control → Policies → Protection des données RH* : chaque
+règle affiche ses ressources, ses opérations, son effet et sa condition. On y lit
+telle quelle la règle `autoriser_documentation` **(1)** et le verrou
+`interdire_echantillons_rh` **(2)**.
+
+![Les deux règles de la politique](img/09-politique.png)
+
 ---
 
 ## TP guidé
@@ -167,12 +189,15 @@ qu'ajouter de la cérémonie.
 ./omlab py tp/09-securite/teams_roles_policies.py
 ```
 
-1. **Settings → Teams** : ouvrez `data_platform`, vérifiez ses deux membres et
-   son rôle par défaut.
-2. **Settings → Roles → omlab_data_steward** : lisez la politique attachée.
-3. **Settings → Policies → omlab_donnees_rh** : lisez les deux règles.
+1. **Settings → Team & User Management → Teams** : ouvrez `Data Platform`,
+   vérifiez ses deux membres et son rôle par défaut.
+2. **Settings → Access Control → Roles → Data Steward omlab** : lisez la
+   politique attachée.
+3. **Settings → Access Control → Policies → Protection des données RH** : lisez
+   les deux règles.
 4. Ouvrez `raw.employees` : elle appartient maintenant à l'équipe.
-5. Donnez un mot de passe à `cmartin` (Settings → Users), ouvrez une fenêtre
+5. Donnez un mot de passe à `cmartin` (Settings → Team & User Management →
+   Users), ouvrez une fenêtre
    privée, connectez-vous, et essayez d'afficher l'échantillon de
    `raw.employees`.
 
