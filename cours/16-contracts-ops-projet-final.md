@@ -61,6 +61,15 @@ Deux détails utiles :
 Pour le voir passer au vert : attribuez la vue à l'équipe `data_platform`
 (chapitre 09) et relancez le script.
 
+### Le contrat dans l'interface
+
+Sur `analytics.v_revenue_monthly`, l'onglet **Contract (1)** présente l'engagement : les
+conditions d'usage, les colonnes promises et leur état, puis les règles sémantiques. Le
+badge **Contract Failed**, en haut de la fiche, le signale à tous ceux qui l'ouvrent,
+et `proprietaire_obligatoire` y apparaît en échec.
+
+![L'onglet Contract de v_revenue_monthly](img/16-contrat.png)
+
 ---
 
 ## Partie B — Exploiter en production
@@ -76,8 +85,12 @@ OpenMetadata embarque des **applications** qui tournent côté serveur :
 | `DataContractValidationApplication` | valide les contrats périodiquement |
 | `DataRetentionApplication` | purge les vieux résultats de tests et versions |
 | `AutoPilotApplication` | découvre et configure automatiquement un nouveau service |
+| MCP Server | expose le catalogue aux assistants IA via le protocole MCP |
 
-Dans l'UI : **Settings → Applications**. Chacune a son calendrier.
+Dans l'UI : **Settings → Applications**. Chacune a son calendrier, et le lien
+**Configure** de sa tuile y mène.
+
+![Les applications installées](img/16-applications.png)
 
 **La réindexation est la première chose à connaître.** Symptôme typique : une
 entité existe (accessible par FQN) mais n'apparaît pas dans la recherche. On

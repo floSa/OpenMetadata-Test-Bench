@@ -208,6 +208,20 @@ Chacun est un travail supplémentaire. La bonne question avant de se lancer :
 *ai-je besoin du catalogue, ou de toute la chaîne ?* Dans neuf cas sur dix,
 cataloguer suffit.
 
+## Mode d'emploi : le connecteur vu de l'interface
+
+**Le service.** *Settings → Services → Databases → omlab_fichiers*. Pour l'interface,
+c'est un service comme un autre : l'onglet **Databases (1)** liste la base `exports`
+**(2)**, avec la description produite par le connecteur.
+
+![Le service omlab_fichiers](img/15-service.png)
+
+**Une table issue d'un CSV.** Le fil d'Ariane **(1)** reprend la hiérarchie
+base / dossier, et le tableau **(2)** les colonnes lues dans l'en-tête, avec leur type
+deviné.
+
+![La table objectifs_2026 cataloguée depuis un CSV](img/15-table-csv.png)
+
 ---
 
 ## TP guidé

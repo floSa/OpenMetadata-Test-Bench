@@ -96,9 +96,12 @@ signifie « à la fin du tableau » :
 
 ### L'écriture inutile ne coûte rien
 
+Lancez deux fois le TP de suite. Le premier passage crée une version, le second non :
+
 ```
 === 2. PATCH : ne toucher qu'un champ ===
-  version     : 0.3 -> 0.3
+  version     : 0.2 -> 0.3      (premier passage)
+  version     : 0.3 -> 0.3      (second passage)
 ```
 
 Un patch qui réécrit la valeur déjà présente **n'incrémente pas la version**
@@ -110,8 +113,8 @@ documentation rejoué tous les jours ne crée pas 365 versions identiques.
 ```
 === 3. Historique ===
   3 version(s) enregistrée(s)
-    v0.3 par ingestion-bot  champs=['description', 'tags']
-    v0.2 par ingestion-bot  champs=['columns.created_at.tags']
+    v0.3 par ingestion-bot  champs=['description']
+    v0.2 par ingestion-bot  champs=['description', 'tags']
     v0.1 par ingestion-bot  champs=[]
 ```
 
@@ -120,8 +123,8 @@ GET /api/v1/tables/{id}/versions            liste
 GET /api/v1/tables/{id}/versions/0.2        un état précis
 ```
 
-Notez la granularité de `columns.created_at.tags` : OpenMetadata trace le
-changement jusqu'à l'étiquette d'une colonne. C'est ce qui alimente l'onglet
+La granularité peut descendre jusqu'à l'étiquette d'une colonne, sous la forme
+`columns.<colonne>.tags` : OpenMetadata trace le changement champ par champ. C'est ce qui alimente l'onglet
 Versions de l'UI, et ce qui permet de répondre à « qui a retiré cette
 étiquette, et quand ? ».
 
@@ -134,7 +137,7 @@ GET /api/v1/search/query?q=commande&index=table_search_index&size=5
 ```
 === 4. Recherche (Elasticsearch, pas la base) ===
   2 résultat(s) pour « commande » :
-      0.61  omlab_postgres.omlab.analytics.fct_orders
+      0.60  omlab_postgres.omlab.analytics.fct_orders
       0.60  omlab_postgres.omlab.raw.order_items
 ```
 
@@ -175,6 +178,14 @@ GET /api/v1/tables?limit=100&after=<paging.after>
 Le curseur garantit qu'une entité créée pendant le parcours ne décale pas
 toute la pagination — ce qui, avec un offset, ferait sauter ou dupliquer des
 lignes sur un gros catalogue.
+
+## Mode d'emploi : le Swagger
+
+http://localhost:8585/docs ouvre la référence de **votre** version, dans l'interface
+elle-même. Le menu de gauche classe les routes par entité, et le champ **Filter** les
+retrouve par nom.
+
+![La référence de l'API servie par l'instance](img/13-swagger.png)
 
 ---
 
@@ -224,6 +235,11 @@ C'est la réponse standard à une validation Pydantic ratée. Causes fréquentes
 un nom d'opération inexistant (chapitre 09), un champ calculé renvoyé en
 écriture (chapitre 12), un enum mal orthographié. Comparez votre corps de
 requête avec ce que renvoie un `GET` sur un objet équivalent.
+
+**« Pourquoi une apostrophe devient-elle `&#39;` ? »**
+Le serveur stocke les descriptions échappées : `GET` renvoie `Chiffre
+d&#39;affaires`, même si l'UI affiche bien `Chiffre d'affaires`. Un script qui
+compare du texte doit d'abord déséchapper, avec `html.unescape` en Python.
 
 **« Peut-on tout faire par l'API ? »**
 Oui. L'UI n'a aucun privilège particulier : tout ce qu'elle affiche ou modifie

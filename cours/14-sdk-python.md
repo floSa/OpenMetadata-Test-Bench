@@ -61,8 +61,8 @@ Description: Clients de la boutique, un enregistrement par client.
 Version    : 0.2
 
 Colonnes :
-  customer_id    INT        PRIMARY_KEY  tags: —
-  email          VARCHAR    NULL         tags: PII.Sensitive
+  customer_id    INT        PRIMARY_KEY  tags: Commerce.Client
+  email          VARCHAR    NULL         tags: Commerce.Client, PII.Sensitive
   first_name     VARCHAR    NOT_NULL     tags: PII.Sensitive
   ...
 ```
@@ -103,6 +103,7 @@ le type Pydantic — on l'oublie une fois, on ne l'oublie plus.
 
 === 2. Propriétaire ===
   raw.orders         appartient à Data Platform
+  analytics.dim_customer   appartient à Data Platform
 
 === 3. Propriété personnalisée ===
   propriété retentionMonths déclarée sur le type `table`
@@ -179,6 +180,19 @@ propriété du SDK :
 
 Un script d'enrichissement du catalogue tourne tous les jours. S'il n'est pas
 idempotent, il produit des doublons et un historique illisible.
+
+## Mode d'emploi : le résultat à l'écran
+
+**La fiche enrichie.** `raw.orders` porte maintenant son propriétaire **(1)**, sa
+criticité **(2)** et sa description **(3)**. Tout est venu du script, sans un clic.
+
+![La fiche de raw.orders enrichie par le SDK](img/14-fiche-enrichie.png)
+
+**La propriété personnalisée.** Sur `raw.employees`, l'onglet **Custom Properties (1)**
+affiche `retentionMonths` **(2)** et sa valeur. Le crayon permet aussi de la modifier
+à la main.
+
+![La propriété retentionMonths](img/14-propriete.png)
 
 ---
 
