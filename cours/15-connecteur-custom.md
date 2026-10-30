@@ -24,13 +24,14 @@ légère : celle qui reste dans votre dépôt.
 
 Un dossier de CSV, présenté comme une base de données :
 
-```
-tp/15-connecteur-custom/donnees/     ← la « base »
-  ventes/                            ← un schéma
-    objectifs_2026.csv               ← une table
-    remises.csv
-  marketing/
-    campagnes.csv
+```mermaid
+flowchart TD
+  B["<b>la « base »</b><br/>tp/15-connecteur-custom/donnees/"]
+  B --> V["<b>un schéma</b><br/>ventes/"]
+  B --> M["<b>un schéma</b><br/>marketing/"]
+  V --> O["<b>une table</b><br/>objectifs_2026.csv"]
+  V --> R["<b>une table</b><br/>remises.csv"]
+  M --> C["<b>une table</b><br/>campagnes.csv"]
 ```
 
 Les colonnes viennent de l'en-tête du fichier, les types sont devinés à la

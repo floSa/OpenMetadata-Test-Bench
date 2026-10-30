@@ -20,13 +20,14 @@ suit la donnée partout où elle va.
 
 ## 2. La structure
 
-```
-Glossaire  Commerce                    le conteneur, avec ses relecteurs
-  ├─ Terme  Client                     définition + synonymes + responsable
-  ├─ Terme  Commande
-  ├─ Terme  ChiffreAffaires
-  │    └─ Terme enfant  CAMensuel      un terme peut en contenir d'autres
-  └─ Terme  Avoir
+```mermaid
+flowchart TD
+  G["<b>Glossaire</b> Commerce<br/>le conteneur, avec ses relecteurs"]
+  G --> C["<b>Terme</b> Client<br/>définition + synonymes + responsable"]
+  G --> O["<b>Terme</b> Commande"]
+  G --> CA["<b>Terme</b> ChiffreAffaires"]
+  G --> A["<b>Terme</b> Avoir"]
+  CA --> M["<b>Terme enfant</b> CAMensuel<br/>un terme peut en contenir d'autres"]
 ```
 
 Quatre notions à distinguer :

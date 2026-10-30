@@ -189,8 +189,14 @@ d'école du défaut que seul un test de catalogue peut révéler.
 
 Un test qui échoue ouvre un **incident**, avec un cycle de vie :
 
-```
-New  →  Ack  →  Assigned  →  Resolved
+```mermaid
+stateDiagram-v2
+  direction LR
+  [*] --> New: un test échoue
+  New --> Ack: pris en compte
+  Ack --> Assigned: confié à un responsable
+  Assigned --> Resolved: cause renseignée
+  Resolved --> [*]
 ```
 
 Un incident résolu demande une **cause** : donnée réellement erronée, test mal

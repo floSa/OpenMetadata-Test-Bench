@@ -70,12 +70,14 @@ place dans une hiérarchie.
 
 Pour les bases de données, la hiérarchie est celle-ci :
 
-```
-Service          omlab_postgres        la connexion : un serveur, des identifiants
-  └─ Database    omlab                 une base
-      └─ Schema  raw                   un schéma
-          └─ Table  customers          une table
-              └─ Column  email         une colonne
+```mermaid
+flowchart TD
+  S["<b>Service</b> · omlab_postgres<br/>la connexion : un serveur, des identifiants"]
+  D["<b>Database</b> · omlab<br/>une base"]
+  SC["<b>Schema</b> · raw<br/>un schéma"]
+  T["<b>Table</b> · customers<br/>une table"]
+  C["<b>Column</b> · email<br/>une colonne"]
+  S --> D --> SC --> T --> C
 ```
 
 Il en existe une par famille de systèmes, toujours bâtie sur le même principe :
@@ -98,10 +100,11 @@ utilisateurs, rôles, politiques, domaines, produits de données, tests, contrat
 Le **nom pleinement qualifié** (*fully qualified name*) est le chemin complet
 d'une entité dans sa hiérarchie, séparé par des points :
 
-```
-omlab_postgres . omlab . raw . customers . email
-    service       base    schéma  table     colonne
-```
+`omlab_postgres.omlab.raw.customers.email` se lit ainsi :
+
+| `omlab_postgres` | `omlab` | `raw` | `customers` | `email` |
+|---|---|---|---|---|
+| service | base | schéma | table | colonne |
 
 Vous allez le taper des centaines de fois : dans les fichiers YAML, dans les
 appels d'API, dans les scripts. Trois choses à savoir dès maintenant.

@@ -12,29 +12,15 @@
 un rôle précis, et les connaître fait gagner un temps considérable au moment
 du premier problème.
 
-```
-                  ┌─────────────────────────────────────────┐
-   navigateur ───▶│  openmetadata-server        :8585       │
-                  │  l'API REST + l'interface web           │
-                  └───┬──────────────┬─────────────┬────────┘
-                      │              │             │
-          ┌───────────▼──┐   ┌───────▼──────┐  ┌───▼──────────────┐
-          │ postgresql   │   │elasticsearch │  │ ingestion :8080  │
-          │ :5432        │   │ :9200        │  │ Airflow          │
-          │ la vérité    │   │ la recherche │  │ exécute les      │
-          │ (entités)    │   │ (l'index)    │  │ workflows        │
-          └──────────────┘   └──────────────┘  └───┬──────────────┘
-                                                   │ interroge
-          ┌────────────────────────────────────────▼──────────────┐
-          │ omlab-postgres :5433   ← LE TERRAIN DE JEU             │
-          │ la base qu'on va cataloguer (schémas raw et analytics) │
-          └───────────────────────────────────────────────────────┘
-          ┌───────────────────────────────────────────────────────┐
-          │ omlab-webhook :8010    reçoit les alertes (ch. 12)     │
-          └───────────────────────────────────────────────────────┘
-          ┌───────────────────────────────────────────────────────┐
-          │ execute-migrate-all    joue les migrations, puis sort  │
-          └───────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+  nav([Navigateur]) -->|":8585"| server["<b>openmetadata-server</b> :8585<br/>l'API REST + l'interface web"]
+  migrate["<b>execute-migrate-all</b><br/>joue les migrations, puis sort"] -.->|avant le démarrage| pg
+  server --> pg[("<b>postgresql</b> :5432<br/>la vérité (entités)")]
+  server --> es[("<b>elasticsearch</b> :9200<br/>la recherche (l'index)")]
+  server --> ing["<b>ingestion</b> :8080<br/>Airflow, exécute les workflows"]
+  ing -->|interroge| play[("<b>omlab-postgres</b> :5433<br/>LE TERRAIN DE JEU<br/>schémas raw et analytics")]
+  server -->|"alertes (ch. 12)"| hook["<b>omlab-webhook</b> :8010<br/>reçoit les alertes"]
 ```
 
 ### Les deux Postgres, et pourquoi on s'y perd

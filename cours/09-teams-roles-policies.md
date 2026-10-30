@@ -13,15 +13,13 @@
 > politique s'attache à un **rôle**. Un rôle se donne à un **utilisateur** ou
 > à une **équipe**.
 
-```
-Utilisateur ──membre──▶ Équipe ──rôle par défaut──▶ Rôle
-     │                                                │
-     └────────────── rôle direct ────────────────────▶│
-                                                      │
-                                                 Politique
-                                                      │
-                                            Règle : effet + opérations
-                                                    + ressources + condition
+```mermaid
+flowchart TD
+  U[Utilisateur] -->|membre| E[Équipe]
+  E -->|rôle par défaut| Ro[Rôle]
+  U -->|rôle direct| Ro
+  Ro --> P[Politique]
+  P --> Re["<b>Règle</b><br/>effet + opérations<br/>+ ressources + condition"]
 ```
 
 Ce qui fait la puissance — et la difficulté — du système, c'est la
@@ -33,8 +31,9 @@ qu'il possède » sans nommer personne.
 
 `teamType` définit la place dans la hiérarchie organisationnelle :
 
-```
-Organization  →  BusinessUnit  →  Division  →  Department  →  Group
+```mermaid
+flowchart LR
+  Organization --> BusinessUnit --> Division --> Department --> Group
 ```
 
 **Seuls les `Group` peuvent avoir des utilisateurs pour membres directs.**
