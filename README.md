@@ -12,6 +12,11 @@ de données réalistes — **défauts compris** —, et un TP exécutable par ch
 Chaque commande de ce dépôt a été exécutée pour de vrai : les sorties reproduites
 dans les chapitres sont celles que vous obtiendrez.
 
+Chaque chapitre pratique contient aussi un **mode d'emploi illustré** : de vraies
+captures de l'interface, avec des repères numérotés que le texte explique.
+
+![La fiche d'une table, annotée, dans le chapitre 03](cours/img/03-fiche.png)
+
 ## Sommaire
 
 - [Architecture](#architecture)
@@ -144,6 +149,16 @@ Chapitre 16 — Contrat de données : 1/1 — tout est bon
 
 Un chapitre non encore fait apparaît en échec : c'est votre liste de courses.
 
+La documentation a son propre contrôle, qui ne demande pas le laboratoire mais
+[uv](https://docs.astral.sh/uv/) et un accès réseau :
+
+```bash
+./omlab check-docs
+```
+
+Il refuse les schémas en dessin ASCII, les liens morts et les captures orphelines, et
+passe chaque bloc Mermaid dans l'analyseur officiel.
+
 ## Structure du projet
 
 | Chemin | Contenu |
@@ -151,9 +166,10 @@ Un chapitre non encore fait apparaît en échec : c'est votre liste de courses.
 | [`omlab`](omlab) | CLI bash : point d'entrée de toutes les commandes |
 | [`.env.example`](.env.example) | modèle de configuration locale |
 | [`cours/`](cours/) | les 16 chapitres |
+| [`cours/img/`](cours/img/) | les captures d'écran du mode d'emploi, générées par `./omlab captures` |
 | [`tp/`](tp/) | un dossier par chapitre : YAML d'ingestion, scripts Python |
 | [`lib/`](lib/) | `om.py` (client partagé), `csv_connector.py` (chapitre 15) |
-| [`scripts/`](scripts/) | `get_token.py`, `check.py`, `webhook_server.py`, `render_yaml.py`, `check_docs.py` |
+| [`scripts/`](scripts/) | `get_token.py`, `check.py`, `webhook_server.py`, `render_yaml.py`, `captures.py`, `check_docs.py` |
 | [`docker/`](docker/) | les deux fichiers compose et le seed SQL du playground |
 
 ## Licences & composants
@@ -246,6 +262,10 @@ Vérifications
   ./omlab check              toutes les vérifications de chapitre
   ./omlab check 04           seulement le chapitre 04
   ./omlab check-docs         contrôle la doc : schémas, liens, Mermaid (hôte, uv)
+
+Mode d'emploi
+  ./omlab captures           refait les captures de cours/img (hôte, uv)
+  ./omlab captures 07 10     seulement ces chapitres
 ```
 
 ## Données du terrain de jeu
@@ -284,7 +304,7 @@ demi-heure quand on le découvre seul.
 | 7 | `pg_stat_statements` n'est pas un journal : vide au démarrage, sans horodatage | 06 |
 | 8 | `generateSampleData` a déménagé dans un workflow `AutoClassification` | 08 |
 | 9 | Un bloc `processor` vide mais **obligatoire**, sous peine d'erreur cryptique | 08 |
-| 10 | La détection de PII rate un numéro de sécurité sociale et étiquette une date de création | 08 |
+| 10 | La détection de PII rate un numéro de sécurité sociale, classe un téléphone comme non sensible et étiquette une date de commande | 08 |
 | 11 | Un nom d'opération de politique erroné donne « Invalid request format » | 09 |
 | 12 | `columnValuesToBeBetween` ne supporte pas le type `NUMERIC` | 10 |
 | 13 | `strategy: COUNT` avec un `SELECT id` renvoie l'id, pas un compte — silencieusement | 10 |
@@ -314,6 +334,10 @@ curl -sL -o docker/docker-compose.openmetadata.yml \
 
 Attendez-vous à des ajustements : plusieurs pièges listés ci-dessus viennent
 précisément de changements de schéma entre versions mineures.
+
+Après un changement de version, rejouez les TP et lancez `./omlab check`, puis
+`./omlab captures` pour remettre le mode d'emploi à jour. Les libellés cités dans les
+chapitres viennent de l'interface 1.13.6, où ils sont en anglais.
 
 ## Ressources
 
