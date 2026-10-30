@@ -7,7 +7,7 @@
 #     -f docker/docker-compose.openmetadata.yml \
 #     -f docker/docker-compose.playground.yml up -d
 #
-# (le Makefile fait ça pour vous)
+# (le script ./omlab fait ça pour vous)
 #
 # Pourquoi le même projet compose ? Pour que ces conteneurs rejoignent le
 # réseau `app_net` d'OpenMetadata, et donc que le conteneur d'ingestion
