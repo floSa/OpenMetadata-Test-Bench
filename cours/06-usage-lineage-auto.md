@@ -70,8 +70,11 @@ lectures répétées sur certaines tables (matière à usage).
 ```
 
 ```
-pg_stat_statements contient maintenant 115 requêtes distinctes.
+pg_stat_statements contient maintenant 263 requêtes distinctes.
 ```
+
+Ce nombre dépend de ce qui a déjà tourné sur la base : ne vous attendez pas au
+même. Ce qui compte, c'est qu'il ne soit pas nul.
 
 > **À faire avant chaque exécution des deux workflows de ce chapitre.** C'est
 > l'artefact du laboratoire : en production, votre entrepôt génère ce trafic
@@ -114,8 +117,8 @@ le type de `amount`, qu'est-ce qui casse exactement ? ».
 **Il a compris des transformations, pas seulement des copies.**
 `date_trunc('month', order_date)` a bien été rattaché à `order_date`.
 
-Dans l'UI : ouvrez `analytics.v_revenue_monthly`, onglet **Lineage**. Le bouton
-d'analyse d'impact remonte tous les descendants — c'est ce qu'on regarde avant
+Dans l'UI : ouvrez `analytics.v_revenue_monthly`, onglet **Lineage**. La sous-vue
+**Impact Analysis** remonte tous les descendants — c'est ce qu'on regarde avant
 une migration.
 
 ## 5. L'usage
@@ -139,17 +142,17 @@ avant d'écrire. Un appel API par requête mettrait le serveur à genoux.
 
 ```
 Workflow Table Usage Summary:
-Processed records: 72
+Processed records: 62
 Workflow Success %: 100.0
 ```
 
 Le classement obtenu :
 
 ```
-    11  p88.0   raw.customers
-     9  p77.0   raw.orders
-     7  p66.0   raw.products
-     5  p33.0   analytics.v_revenue_monthly
+    10  p88.0   raw.customers
+     8  p77.0   raw.orders
+     6  p66.0   raw.products
+     5  p55.0   analytics.v_revenue_monthly
      ...
      3  p0.0    analytics.v_customer_360
 ```
@@ -163,6 +166,38 @@ L'onglet **Queries** d'une table liste les requêtes qui l'ont touchée. Pour
 comprendre comment une table est *vraiment* utilisée, c'est plus instructif
 que n'importe quelle documentation.
 
+## Mode d'emploi : lire le graphe
+
+**Le graphe.** Ouvrez `analytics.v_revenue_monthly`, onglet **Lineage (1)**. Le flux
+se lit de gauche à droite : les sources `raw.customers` et `raw.orders`, puis
+`fct_orders`, puis la vue. L'arc au-dessus de `customers` est une arête de la table
+vers elle-même : le trafic du labo contient un `UPDATE raw.customers` qui lit
+`raw.customers`, et le parseur l'interprète ainsi.
+
+![Le graphe de lineage de v_revenue_monthly](img/06-lineage.png)
+
+**Colonne à colonne.** Cliquez sur **Layers (3)**, puis **Column**. Chaque table se
+déplie, et un clic sur une colonne surligne son chemin : ici, `revenue` remonte
+à `fct_orders.amount`, puis à `orders.amount`.
+
+![Le chemin d'une colonne à travers le graphe](img/06-lineage-colonnes.png)
+
+**L'impact.** La sous-vue **Impact Analysis (2)** répond à la question en liste plutôt
+qu'en graphe. Sur `raw.orders`, le sens **Downstream** montre quatre descendants, avec
+leur profondeur et leur propriétaire.
+
+![L'analyse d'impact de raw.orders](img/06-impact.png)
+
+**Les requêtes.** L'onglet **Queries (1)** de `raw.customers` liste le SQL observé,
+avec sa durée.
+
+![Les requêtes observées sur raw.customers](img/06-requetes.png)
+
+**La popularité.** Dans **Explore**, le tri **Popularity (1)** classe les assets selon
+le percentile d'usage calculé ci-dessus.
+
+![Le tri par popularité dans Explore](img/06-popularite.png)
+
 ---
 
 ## TP guidé
@@ -175,7 +210,7 @@ que n'importe quelle documentation.
 
 1. Dans l'UI, ouvrez `analytics.v_revenue_monthly`, onglet **Lineage**.
    Remontez jusqu'à `raw.orders`.
-2. Activez l'affichage colonne à colonne et suivez le chemin de `amount`.
+2. Cliquez sur **Layers → Column** et suivez le chemin de `amount`.
 3. Ouvrez `raw.customers`, onglet **Queries**.
 4. Triez la recherche par popularité et retrouvez le classement ci-dessus.
 
@@ -188,7 +223,7 @@ que n'importe quelle documentation.
 ```
 Chapitre 06 — Usage et lineage automatique
   OK   au moins 5 tables ont des statistiques d'usage (9)
-  OK   fct_orders a au moins 2 sources en amont (2)
+  OK   fct_orders a au moins 2 sources en amont (3)
   OK   le lineage descend au niveau des colonnes
 ```
 

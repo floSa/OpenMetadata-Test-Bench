@@ -12,7 +12,7 @@
 |---|---|---|
 | Ce qu'elle lit | le **catalogue système** | les **données elles-mêmes** |
 | SQL exécuté | `SELECT ... FROM information_schema` | `SELECT count(*), min(x), ... FROM votre_table` |
-| Durée sur 9 tables | 1 seconde | 24 secondes |
+| Durée sur 9 tables | 1 seconde | une trentaine de secondes |
 | Coût sur un entrepôt facturé | négligeable | **réel, et parfois salé** |
 | Fréquence raisonnable | quotidienne | hebdomadaire, ou par échantillon |
 
@@ -122,17 +122,12 @@ Processed records: 8
 Filtered: 1              ← raw.employees, exclue volontairement
 Workflow Profiler Summary:
 Processed records: 166   ← 166 métriques calculées
-Workflow finished in time: 23s 970ms
+Workflow finished in time: 38s 416ms
 ```
 
-Dans l'UI, ouvrez `raw.customers`, onglet **Profiler & Data Quality**. Vous
-lisez maintenant, pour `country` :
-
-```
-nullCount        39         (sur 500)
-nullProportion   0.078
-distinctCount    8
-```
+Dans l'UI, ouvrez `raw.customers`, onglet **Data Observability**. Vous
+lisez maintenant, pour `country` : `Null Count` à 39 sur 500 lignes, soit 7,8 %,
+et `Distinct Count` à 8. Le mode d'emploi ci-dessous montre où.
 
 Trente-neuf pays manquants — exactement ce que le jeu de données contient. On
 peut le vérifier des deux côtés :
@@ -153,13 +148,33 @@ C'est aussi ce qui rend possibles les tests « à assertion dynamique » du
 chapitre 10, qui comparent la valeur du jour à l'historique plutôt qu'à un
 seuil écrit en dur.
 
+## Mode d'emploi : lire un profil
+
+**La vue d'ensemble.** Sur la fiche de `raw.customers`, ouvrez l'onglet
+**Data Observability (1)**. La sous-vue **Table Profile (2)** donne le nombre de
+lignes et de colonnes, la taille, le taux d'échantillonnage, puis les courbes dans
+le temps de la section 5.
+
+![Le profil de la table raw.customers](img/05-profil-table.png)
+
+**Colonne par colonne.** La sous-vue **Column Profile (1)** liste toutes les colonnes
+avec leurs taux. La ligne `country` **(2)** montre tout de suite ses 7,8 % de nulls.
+
+![Le profil de toutes les colonnes](img/05-profil-colonnes.png)
+
+**Le détail d'une colonne.** Cliquez sur le nom `country` : les compteurs et leurs
+courbes s'affichent, avec le test de qualité qui surveille cette colonne. On y
+retrouve les 39 nulls et les 8 valeurs distinctes.
+
+![Le détail du profil de la colonne country](img/05-profil-country.png)
+
 ---
 
 ## TP guidé
 
 1. `./omlab profile tp/05-profiler/profiler.yaml`
-2. Ouvrez `raw.customers` dans l'UI, onglet Profiler. Repérez `country` et son
-   taux de nulls.
+2. Ouvrez `raw.customers` dans l'UI, onglet **Data Observability**, sous-vue
+   **Column Profile**. Repérez `country` et son taux de nulls.
 3. Vérifiez en base : `./omlab psql "SELECT count(*) FROM raw.customers WHERE country IS NULL"`
 4. Cherchez `raw.employees` dans l'UI : aucune donnée de profiling. Comprenez
    pourquoi en relisant `tableFilterPattern`.

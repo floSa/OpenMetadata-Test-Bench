@@ -173,11 +173,44 @@ en YAML parce que c'est ce qui se versionne, se relit et se rejoue.
 
 ### Faire la même chose dans l'UI
 
-Cela vaut la peine de le faire une fois, pour voir le formulaire :
-*Settings → Services → Databases → Add New Service → Postgres*, puis
-*Add Ingestion*. Le bouton **Test Connection** rejoue exactement les étapes
-vues plus haut. Une fois déployé, le workflow apparaît dans Airflow
-(http://localhost:8080) sous forme de DAG.
+Cela vaut la peine de le faire une fois, pour voir le formulaire. Le chemin est
+*Settings → Services → Databases*.
+
+**1. Ouvrir la liste des services.** Le service `omlab_postgres` **(2)** créé par
+le YAML y figure déjà. Cliquez sur **Add New Service (1)**.
+
+![La liste des services de base de données](img/04-services.png)
+
+**2. Choisir le connecteur.** Cherchez `postgres`, sélectionnez la tuile
+**Postgres (1)**, puis **Next (2)**.
+
+![Le choix du connecteur Postgres](img/04-ajout-service.png)
+
+**3. Nommer le service.** Ce nom **(1)** deviendra le premier segment de tous les
+FQN : c'est le `serviceName` du YAML, et le choix est définitif en pratique.
+
+![La saisie du nom du service](img/04-nom-service.png)
+
+**4. Renseigner la connexion.** Le formulaire reprend les champs du bloc
+`serviceConnection` : `Username`, `Password`, `Host And Port`, `Database`. Comme
+pour le YAML, l'hôte est vu depuis les conteneurs : `omlab-postgres:5432`.
+
+![Le formulaire de connexion Postgres](img/04-connexion.png)
+
+**5. Tester la connexion.** Une fois le service créé, son onglet **Connection (2)**
+propose **Test Connection (3)**, qui rejoue exactement les étapes vues plus haut.
+
+![L'onglet Connection et son bouton de test](img/04-connexion-test.png)
+
+**6. Planifier.** L'onglet **Agents (1)** de l'écran précédent héberge les workflows
+planifiés : c'est ici que le bouton **Add Agent** crée une ingestion. Une fois
+déployée, elle apparaît dans Airflow (http://localhost:8080) sous forme de DAG.
+
+![L'onglet Agents, vide tant qu'aucun workflow n'est déployé depuis l'UI](img/04-agents.png)
+
+Il reste vide sur `omlab_postgres` : nos workflows sont lancés en ligne de commande,
+sans passer par l'interface. C'est aussi un point à retenir : **cet écran ne montre
+pas les exécutions faites en CLI**.
 
 ## 5. Ce qui a réellement été créé
 
@@ -189,11 +222,11 @@ vues plus haut. Une fois déployé, le workflow apparaît dans Airflow
 Table      : omlab_postgres.omlab.raw.customers
 Type       : Regular
 Description: Clients de la boutique, un enregistrement par client.
-Version    : 0.2
+Version    : 0.1
 
 Colonnes :
   customer_id    INT        PRIMARY_KEY  tags: —
-  email          VARCHAR    NULL         tags: PII.Sensitive
+  email          VARCHAR    NULL         tags: —
   ...
 ```
 
