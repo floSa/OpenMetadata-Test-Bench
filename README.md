@@ -302,17 +302,18 @@ demi-heure quand on le découvre seul.
 | 5 | `profileSampleConfig` a changé de structure : deux niveaux en 1.13 | 05 |
 | 6 | Le profiler ignore les vues par défaut, contrairement au workflow de métadonnées | 05 |
 | 7 | `pg_stat_statements` n'est pas un journal : vide au démarrage, sans horodatage | 06 |
-| 8 | `generateSampleData` a déménagé dans un workflow `AutoClassification` | 08 |
-| 9 | Un bloc `processor` vide mais **obligatoire**, sous peine d'erreur cryptique | 08 |
-| 10 | La détection de PII rate un numéro de sécurité sociale, classe un téléphone comme non sensible et étiquette une date de commande | 08 |
-| 11 | Un nom d'opération de politique erroné donne « Invalid request format » | 09 |
-| 12 | `columnValuesToBeBetween` ne supporte pas le type `NUMERIC` | 10 |
-| 13 | `strategy: COUNT` avec un `SELECT id` renvoie l'id, pas un compte — silencieusement | 10 |
-| 14 | Les tests s'exécutent sur un échantillon **dynamique** par défaut | 10 |
-| 15 | Un test retiré du YAML continue de tourner : le YAML ne supprime jamais | 10 |
-| 16 | `filteringRules` est calculé : en écriture, c'est `input` | 12 |
-| 17 | `?fields=columns` renvoie les colonnes **sans** leurs étiquettes | 13 |
-| 18 | Un connecteur maison doit créer son service lui-même, sinon 100 % de succès et zéro écriture | 15 |
+| 8 | Le workflow d'usage ne met pas à jour l'index : la recherche affiche `0th pctile` jusqu'à la réindexation | 06 |
+| 9 | `generateSampleData` a déménagé dans un workflow `AutoClassification` | 08 |
+| 10 | Un bloc `processor` vide mais **obligatoire**, sous peine d'erreur cryptique | 08 |
+| 11 | La détection de PII rate un numéro de sécurité sociale, classe un téléphone comme non sensible et étiquette une date de commande | 08 |
+| 12 | Un nom d'opération de politique erroné donne « Invalid request format » | 09 |
+| 13 | `columnValuesToBeBetween` ne supporte pas le type `NUMERIC` | 10 |
+| 14 | `strategy: COUNT` avec un `SELECT id` renvoie l'id, pas un compte — silencieusement | 10 |
+| 15 | Les tests s'exécutent sur un échantillon **dynamique** par défaut | 10 |
+| 16 | Un test retiré du YAML continue de tourner : le YAML ne supprime jamais | 10 |
+| 17 | `filteringRules` est calculé : en écriture, c'est `input` | 12 |
+| 18 | `?fields=columns` renvoie les colonnes **sans** leurs étiquettes | 13 |
+| 19 | Un connecteur maison doit créer son service lui-même, sinon 100 % de succès et zéro écriture | 15 |
 
 ## Versions
 

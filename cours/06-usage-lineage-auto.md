@@ -193,8 +193,9 @@ avec sa durée.
 
 ![Les requêtes observées sur raw.customers](img/06-requetes.png)
 
-**La popularité.** Dans **Explore**, le tri **Popularity (1)** classe les assets selon
-le percentile d'usage calculé ci-dessus.
+**La popularité.** Dans **Explore**, le tri **Popularity (1)** classe les assets, et
+chaque résultat affiche son percentile d'usage. Ces chiffres viennent de l'index de
+recherche : voyez le piège ci-dessous si tout reste à `0th pctile`.
 
 ![Le tri par popularité dans Explore](img/06-popularite.png)
 
@@ -212,7 +213,8 @@ le percentile d'usage calculé ci-dessus.
    Remontez jusqu'à `raw.orders`.
 2. Cliquez sur **Layers → Column** et suivez le chemin de `amount`.
 3. Ouvrez `raw.customers`, onglet **Queries**.
-4. Triez la recherche par popularité et retrouvez le classement ci-dessus.
+4. Réindexez (voir *Pièges & FAQ*), triez la recherche par popularité et
+   retrouvez les percentiles ci-dessus.
 
 **Vérifier :**
 
@@ -255,6 +257,18 @@ Dans l'ordre : avez-vous lancé `./omlab traffic` ? Le compte a-t-il
 Le parseur SQL renonce plutôt que d'inventer : requêtes trop dynamiques, SQL
 généré, procédures stockées. C'est un choix sain — un faux lineage est pire
 que pas de lineage. Le complément se fait à la main : chapitre 11.
+
+**« La recherche affiche `0th pctile` partout, alors que la fiche dit `88th`. »**
+Le workflow d'usage met à jour la base, pas l'index Elasticsearch. Tant qu'on n'a pas
+réindexé, la recherche voit des percentiles à zéro, sans le moindre message d'erreur.
+Lancez *Settings → Applications → Search Indexing → Run Now*, ou par l'API :
+
+```bash
+curl -X POST -H "Authorization: Bearer $OM_TOKEN" -H "Content-Type: application/json" \
+  -d '{}' localhost:8585/api/v1/apps/trigger/SearchIndexingApplication
+```
+
+En production, planifiez cette application après le workflow d'usage.
 
 **« Faut-il lancer les deux workflows ? »**
 Ils sont indépendants. Le lineage répond à « qu'est-ce qui casse ? », l'usage
