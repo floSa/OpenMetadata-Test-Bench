@@ -45,7 +45,7 @@ need_docker() {
 # =====================================================================
 cmd_up() {
   need_docker
-  c_head "Démarrage de la stack (OpenMetadata 1.13.6 + playground)"
+  c_head "Démarrage de la stack (OpenMetadata 2.0.7 + playground)"
   c_warn "Au premier lancement, environ 5 Go d'images sont téléchargés. Patience."
   dc up -d
   cmd_wait
@@ -83,6 +83,9 @@ cmd_nuke() {
   read -r -p "Confirmer ? [oui/non] " answer
   [ "$answer" = "oui" ] || { echo "Annulé."; exit 0; }
   dc down -v
+  # La base interne d'OpenMetadata est un dossier monté, pas un volume : `down -v`
+  # ne la touche pas. Elle appartient à root, d'où le passage par un conteneur.
+  docker run --rm -v "$ROOT/docker:/d" alpine rm -rf /d/docker-volume
   c_ok "Environnement remis à zéro. Relancez ./omlab up"
 }
 
@@ -164,6 +167,40 @@ cmd_check() {
 }
 
 # ---------------------------------------------------------------------
+# Rejoue tous les TP dans l'ordre : le catalogue de la fin du tutoriel
+# ---------------------------------------------------------------------
+cmd_demo() {
+  cmd_token
+  # get_token.py vient d'écrire le jeton : les étapes suivantes le relisent
+  set -a; . ./.env; set +a
+  cmd_ingest tp/04-ingestion/metadata.yaml
+  cmd_profile tp/05-profiler/profiler.yaml
+  cmd_traffic
+  cmd_ingest tp/06-usage-lineage/lineage.yaml
+  cmd_usage tp/06-usage-lineage/usage.yaml
+  cmd_py tp/07-glossaire/creer_glossaire.py
+  cmd_py tp/07-glossaire/rattacher_termes.py
+  cmd_classify tp/08-classification/auto-classification.yaml
+  cmd_py tp/09-securite/teams_roles_policies.py
+  cmd_test tp/10-qualite/tests-orders.yaml
+  cmd_test tp/10-qualite/tests-customers.yaml
+  cmd_test tp/10-qualite/tests-products.yaml
+  cmd_py tp/11-lineage/lineage_manuel.py
+  cmd_py tp/12-alertes/creer_alerte.py
+  cmd_test tp/10-qualite/tests-orders.yaml
+  cmd_py tp/12-alertes/lire_evenements.py
+  cmd_py tp/13-api/tour_api.py
+  cmd_py tp/14-sdk/01_lecture.py
+  cmd_py tp/14-sdk/02_ecriture.py
+  cmd_ingest tp/15-connecteur-custom/csv.yaml
+  cmd_py tp/16-contracts-ops/contrat_donnees.py
+  c_head "Réindexation : sans elle, la recherche ignore l'usage et les étiquettes"
+  curl -sf -X POST -H "Authorization: Bearer $OM_TOKEN" -H "Content-Type: application/json" \
+    -d '{}' "$OM_HOST/api/v1/apps/trigger/SearchIndexingApplication" >/dev/null
+  c_ok "Réindexation lancée. Contrôlez le résultat avec ./omlab check"
+}
+
+# ---------------------------------------------------------------------
 # Documentation — sur la machine hôte, avec uv et un navigateur Playwright
 # ---------------------------------------------------------------------
 need_browser() {
@@ -207,6 +244,7 @@ omlab — laboratoire OpenMetadata
     ./omlab classify <fichier.yaml>   échantillonnage + détection de PII
     ./omlab app      <fichier.yaml>   application interne (réindexation...)
     ./omlab py       <script.py>      exécute un script du SDK
+    ./omlab demo               rejoue tous les TP, du chapitre 04 au 16
 
   Vérifications
     ./omlab check              lance toutes les vérifications de chapitre
@@ -222,7 +260,7 @@ EOF
 main() {
   local cmd="${1:-help}"; shift || true
   case "$cmd" in
-    up|wait|down|nuke|status|logs|psql|traffic|token|ingest|profile|test|usage|classify|app|py|check|captures|help)
+    up|wait|down|nuke|status|logs|psql|traffic|token|ingest|profile|test|usage|classify|app|py|demo|check|captures|help)
       "cmd_$cmd" "$@" ;;
     check-docs) cmd_check_docs "$@" ;;
     *) c_err "Commande inconnue : $cmd"; echo; cmd_help; exit 1 ;;
