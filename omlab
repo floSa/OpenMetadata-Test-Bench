@@ -163,6 +163,19 @@ cmd_check() {
   cmd_py scripts/check.py "$@"
 }
 
+# ---------------------------------------------------------------------
+# Documentation — sur la machine hôte, avec uv et un navigateur Playwright
+# ---------------------------------------------------------------------
+need_browser() {
+  command -v uv >/dev/null || { c_err "uv est requis : https://docs.astral.sh/uv/"; exit 1; }
+  uv run -q --python 3.12 --with playwright==1.58.0 playwright install chromium
+}
+
+cmd_check_docs() {
+  need_browser
+  uv run -q --script scripts/check_docs.py "$@"
+}
+
 # =====================================================================
 cmd_help() {
   cat <<'EOF'
@@ -193,6 +206,7 @@ omlab — laboratoire OpenMetadata
   Vérifications
     ./omlab check              lance toutes les vérifications de chapitre
     ./omlab check 04           lance celle du chapitre 04
+    ./omlab check-docs         contrôle la doc : schémas, liens, Mermaid (hôte, uv)
 EOF
 }
 
@@ -202,6 +216,7 @@ main() {
   case "$cmd" in
     up|wait|down|nuke|status|logs|psql|traffic|token|ingest|profile|test|usage|classify|app|py|check|help)
       "cmd_$cmd" "$@" ;;
+    check-docs) cmd_check_docs "$@" ;;
     *) c_err "Commande inconnue : $cmd"; echo; cmd_help; exit 1 ;;
   esac
 }
