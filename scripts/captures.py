@@ -32,6 +32,10 @@ WEBHOOK = f"http://localhost:{os.environ.get('OMLAB_WEBHOOK_PORT', '8010')}"
 ADMIN = os.environ.get("OM_ADMIN_USER", "admin@open-metadata.org")
 MOT_DE_PASSE = os.environ.get("OM_ADMIN_PASSWORD", "admin")
 
+# Double densité : GitHub réduit l'image à la largeur de la page, et le lecteur
+# doit pouvoir zoomer sur un libellé sans qu'il devienne flou.
+DENSITE = 2
+
 SERVICE = "omlab_postgres.omlab"
 CUSTOMERS = f"/table/{SERVICE}.raw.customers"
 ORDERS = f"/table/{SERVICE}.raw.orders"
@@ -102,8 +106,9 @@ class Manuel:
         chemin = SORTIE / f"{nom}.png"
         options = {"x": cadre[0], "y": cadre[1], "width": cadre[2], "height": cadre[3]} if cadre else None
         self.page.screenshot(path=chemin, clip=options, animations="disabled")
-        # 256 couleurs suffisent à une interface et divisent le poids par trois
-        Image.open(chemin).convert("RGB").quantize(256, method=2).save(chemin, optimize=True)
+        # 256 couleurs suffisent à une interface et divisent le poids par trois ;
+        # sans tramage, le texte reste net quand on zoome.
+        Image.open(chemin).convert("RGB").quantize(256, method=2, dither=Image.Dither.NONE).save(chemin, optimize=True)
         self.page.evaluate("document.querySelectorAll('.omlab-pastille').forEach(e => e.remove())")
         self.numero = 0
         print(f"  {nom}.png")
@@ -202,7 +207,14 @@ def chapitre_04(m: Manuel) -> None:
     m.enregistrer("04-connexion")
 
     m.ouvrir("/service/databaseServices/omlab_postgres/ingestions")
+    m.page.get_by_role("tab", name="Connection").click()
+    m.reposer(1500)
     m.noter(m.page.get_by_role("tab", name="Agents"), m.page.get_by_role("tab", name="Connection"))
+    m.noter(m.page.get_by_role("button", name="Test Connection"))
+    m.enregistrer("04-connexion-test")
+
+    m.page.get_by_role("tab", name="Agents").click()
+    m.reposer(2500)
     m.enregistrer("04-agents")
 
 
@@ -401,7 +413,7 @@ CHAPITRES: dict[str, Callable[[Manuel], None]] = {
 
 
 def connexion_anonyme(navigateur) -> None:
-    page = navigateur.new_page(viewport={"width": 1440, "height": 900}, locale="en-US")
+    page = navigateur.new_page(viewport={"width": 1440, "height": 900}, device_scale_factor=DENSITE, locale="en-US")
     m = Manuel(page)
     m.ouvrir("/signin")
     m.noter("email", "password", "login")
@@ -417,7 +429,9 @@ def main() -> int:
         navigateur = p.chromium.launch()
         if "02" in demandes:
             connexion_anonyme(navigateur)
-        contexte = navigateur.new_context(viewport={"width": 1440, "height": 900}, locale="en-US")
+        contexte = navigateur.new_context(
+            viewport={"width": 1440, "height": 900}, device_scale_factor=DENSITE, locale="en-US"
+        )
         page = contexte.new_page()
         page.goto(f"{OM}/signin")
         page.fill("#email", ADMIN)
