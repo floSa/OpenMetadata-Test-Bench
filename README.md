@@ -146,17 +146,15 @@ Un chapitre non encore fait apparaît en échec : c'est votre liste de courses.
 
 ## Structure du projet
 
-```text
-openmetadata-tuto/
-├── omlab                  # CLI bash : point d'entrée de toutes les commandes
-├── .env.example
-├── cours/                 # les 16 chapitres
-├── tp/                    # un dossier par chapitre : YAML d'ingestion, scripts Python
-├── lib/                   # om.py (client partagé), csv_connector.py (chapitre 15)
-├── scripts/               # get_token.py, check.py, webhook_server.py, render_yaml.py
-├── docker/                # les deux fichiers compose et le seed SQL du playground
-└── README.md
-```
+| Chemin | Contenu |
+|---|---|
+| [`omlab`](omlab) | CLI bash : point d'entrée de toutes les commandes |
+| [`.env.example`](.env.example) | modèle de configuration locale |
+| [`cours/`](cours/) | les 16 chapitres |
+| [`tp/`](tp/) | un dossier par chapitre : YAML d'ingestion, scripts Python |
+| [`lib/`](lib/) | `om.py` (client partagé), `csv_connector.py` (chapitre 15) |
+| [`scripts/`](scripts/) | `get_token.py`, `check.py`, `webhook_server.py`, `render_yaml.py`, `check_docs.py` |
+| [`docker/`](docker/) | les deux fichiers compose et le seed SQL du playground |
 
 ## Licences & composants
 
@@ -247,6 +245,7 @@ OpenMetadata
 Vérifications
   ./omlab check              toutes les vérifications de chapitre
   ./omlab check 04           seulement le chapitre 04
+  ./omlab check-docs         contrôle la doc : schémas, liens, Mermaid (hôte, uv)
 ```
 
 ## Données du terrain de jeu
@@ -254,15 +253,15 @@ Vérifications
 Un mini-entrepôt retail dans `omlab-postgres`, conçu pour que chaque chapitre
 ait de quoi mordre :
 
-```
-raw.customers      500 lignes   39 pays NULL, 12 e-mails en doublon, PII
-raw.orders       3 000 lignes   88 montants négatifs (des avoirs mal modélisés)
-raw.order_items  7 200 lignes   135 quantités à zéro
-raw.products        80 lignes   5 produits partagent le même SKU
-raw.employees       60 lignes   e-mails, téléphones, numéros de sécurité sociale
-analytics.dim_customer, analytics.fct_orders          alimentées par SQL → lineage
-analytics.v_revenue_monthly, analytics.v_customer_360 vues → lineage garanti
-```
+| Table | Lignes | Particularités |
+|---|---|---|
+| `raw.customers` | 500 | 39 pays NULL, 12 e-mails en doublon, PII |
+| `raw.orders` | 3 000 | 88 montants négatifs (des avoirs mal modélisés) |
+| `raw.order_items` | 7 200 | 135 quantités à zéro |
+| `raw.products` | 80 | 5 produits partagent le même SKU |
+| `raw.employees` | 60 | e-mails, téléphones, numéros de sécurité sociale |
+| `analytics.dim_customer`, `analytics.fct_orders` | — | alimentées par SQL → lineage |
+| `analytics.v_revenue_monthly`, `analytics.v_customer_360` | — | vues → lineage garanti |
 
 **Ces défauts sont volontaires.** Ils font échouer les tests du chapitre 10
 pour de vraies raisons — un catalogue tout au vert sur des données réelles
