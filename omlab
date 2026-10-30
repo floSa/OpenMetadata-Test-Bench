@@ -171,6 +171,11 @@ need_browser() {
   uv run -q --python 3.12 --with playwright==1.58.0 playwright install chromium
 }
 
+cmd_captures() {
+  need_browser
+  uv run -q --script scripts/captures.py "$@"
+}
+
 cmd_check_docs() {
   need_browser
   uv run -q --script scripts/check_docs.py "$@"
@@ -207,6 +212,9 @@ omlab — laboratoire OpenMetadata
     ./omlab check              lance toutes les vérifications de chapitre
     ./omlab check 04           lance celle du chapitre 04
     ./omlab check-docs         contrôle la doc : schémas, liens, Mermaid (hôte, uv)
+
+  Mode d'emploi
+    ./omlab captures [07 10]   refait les captures d'écran de cours/img (hôte, uv)
 EOF
 }
 
@@ -214,7 +222,7 @@ EOF
 main() {
   local cmd="${1:-help}"; shift || true
   case "$cmd" in
-    up|wait|down|nuke|status|logs|psql|traffic|token|ingest|profile|test|usage|classify|app|py|check|help)
+    up|wait|down|nuke|status|logs|psql|traffic|token|ingest|profile|test|usage|classify|app|py|check|captures|help)
       "cmd_$cmd" "$@" ;;
     check-docs) cmd_check_docs "$@" ;;
     *) c_err "Commande inconnue : $cmd"; echo; cmd_help; exit 1 ;;
