@@ -61,14 +61,6 @@ source:
           - "^raw$"
           - "^analytics$"
 
-# Ce bloc paraît inutile — le workflow construit lui-même ses étapes — mais il
-# est OBLIGATOIRE : le code lit `config.processor.config` sans vérifier qu'il
-# existe. L'omettre donne l'erreur cryptique :
-#   Error initializing metadata: 'NoneType' object has no attribute 'model_dump'
-processor:
-  type: orm-profiler
-  config: {}
-
 sink:
   type: metadata-rest
   config: {}

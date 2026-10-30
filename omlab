@@ -188,16 +188,27 @@ cmd_demo() {
   cmd_py tp/11-lineage/lineage_manuel.py
   cmd_py tp/12-alertes/creer_alerte.py
   cmd_test tp/10-qualite/tests-orders.yaml
+  sleep 30  # le serveur dépile les événements par lots
   cmd_py tp/12-alertes/lire_evenements.py
   cmd_py tp/13-api/tour_api.py
   cmd_py tp/14-sdk/01_lecture.py
   cmd_py tp/14-sdk/02_ecriture.py
   cmd_ingest tp/15-connecteur-custom/csv.yaml
   cmd_py tp/16-contracts-ops/contrat_donnees.py
+  cmd_py tp/17-tour-2x/01_domaine_produit.py
+  cmd_py tp/17-tour-2x/02_annonce_tache.py
+  cmd_py tp/17-tour-2x/03_article.py
+  cmd_py tp/17-tour-2x/04_client_mcp.py
   c_head "Réindexation : sans elle, la recherche ignore l'usage et les étiquettes"
+  trigger_app SearchIndexingApplication
+  sleep 60  # Data Insights lit l'index : il doit être reconstruit avant
+  trigger_app DataInsightsApplication
+  c_ok "Applications lancées. Contrôlez le résultat avec ./omlab check"
+}
+
+trigger_app() {
   curl -sf -X POST -H "Authorization: Bearer $OM_TOKEN" -H "Content-Type: application/json" \
-    -d '{}' "$OM_HOST/api/v1/apps/trigger/SearchIndexingApplication" >/dev/null
-  c_ok "Réindexation lancée. Contrôlez le résultat avec ./omlab check"
+    -d '{}' "$OM_HOST/api/v1/apps/trigger/$1" >/dev/null
 }
 
 # ---------------------------------------------------------------------
@@ -244,7 +255,7 @@ omlab — laboratoire OpenMetadata
     ./omlab classify <fichier.yaml>   échantillonnage + détection de PII
     ./omlab app      <fichier.yaml>   application interne (réindexation...)
     ./omlab py       <script.py>      exécute un script du SDK
-    ./omlab demo               rejoue tous les TP, du chapitre 04 au 16
+    ./omlab demo               rejoue tous les TP, du chapitre 04 au 17
 
   Vérifications
     ./omlab check              lance toutes les vérifications de chapitre

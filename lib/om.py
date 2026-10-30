@@ -19,6 +19,7 @@ Usage typique dans un TP :
 
 from __future__ import annotations
 
+import base64
 import json
 import os
 import urllib.error
@@ -117,6 +118,7 @@ def api(
     method: str = "GET",
     body: Any = None,
     content_type: str = "application/json",
+    token: str | None = None,
 ) -> Any:
     """Appelle l'API REST directement. ``path`` est relatif à /api/v1.
 
@@ -129,7 +131,7 @@ def api(
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(url, data=data, method=method)
     req.add_header("Content-Type", content_type)
-    req.add_header("Authorization", f"Bearer {_require_token()}")
+    req.add_header("Authorization", f"Bearer {token or _require_token()}")
     try:
         with urllib.request.urlopen(req, timeout=60) as resp:
             raw = resp.read().decode()
@@ -139,6 +141,14 @@ def api(
         raise SystemExit(f"HTTP {exc.code} sur {method} {url}\n{detail}") from exc
     except urllib.error.URLError as exc:
         raise SystemExit(f"{HOST} injoignable ({exc.reason}). La stack tourne-t-elle ?") from exc
+
+
+def jeton_admin() -> str:
+    """Ouvre une session admin, pour les rares écritures interdites à l'ingestion-bot."""
+    utilisateur = os.environ.get("OM_ADMIN_USER", "admin@open-metadata.org")
+    mot_de_passe = os.environ.get("OM_ADMIN_PASSWORD", "admin")
+    corps = {"email": utilisateur, "password": base64.b64encode(mot_de_passe.encode()).decode()}
+    return api("/users/login", method="POST", body=corps, token="sans-objet")["accessToken"]
 
 
 # ---------------------------------------------------------------------

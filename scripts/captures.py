@@ -94,7 +94,7 @@ class Manuel:
 
     def noter_fil_ariane(self) -> None:
         """Encadre le fil d'Ariane lui-même : son conteneur prend toute la largeur."""
-        boites = [e.bounding_box() for e in self.page.get_by_test_id("breadcrumb-link").all()]
+        boites = [e.bounding_box() for e in self.page.get_by_test_id("breadcrumb").first.locator("li").all()]
         droite = max(b["x"] + b["width"] for b in boites)
         self.pastille(boites[0]["x"], boites[0]["y"], droite - boites[0]["x"], boites[0]["height"])
 
@@ -143,7 +143,12 @@ def chapitre_02(m: Manuel) -> None:
     m.tid("welcome-screen-close-btn").click()
     m.page.add_style_tag(content="[data-testid='whats-new-alert-card'] { display: none }")
     m.reposer(1500)
-    m.noter("side-bar-app-bar-item-explore", "side-bar-observability", "side-bar-governance", "app-bar-item-settings")
+    m.noter(
+        "side-bar-app-bar-item-explore",
+        "side-bar-observability",
+        "side-bar-governance",
+        m.page.locator("[data-testid='left-sidebar'] a[href='/settings']"),
+    )
     m.enregistrer("02-accueil")
 
     m.ouvrir("/settings")
@@ -191,22 +196,16 @@ def chapitre_04(m: Manuel) -> None:
     m.enregistrer("04-services")
 
     m.ouvrir("/databaseServices/add-service")
-    m.page.get_by_placeholder("Search for Connector").fill("postgres")
+    m.page.get_by_placeholder("Search for a connector").fill("postgres")
     m.page.wait_for_timeout(500)
-    m.tid("Postgres").click()
-    m.noter("Postgres", "next-button")
+    m.noter("Postgres")
     m.enregistrer("04-ajout-service")
 
-    m.tid("next-button").click()
-    m.page.wait_for_timeout(500)
-    m.tid("service-name").fill("omlab_postgres_ui")
-    m.noter("service-name")
-    m.enregistrer("04-nom-service")
-
-    m.tid("next-button").click()
+    m.tid("Postgres").click()
     m.reposer()
     m.page.set_viewport_size({"width": 1440, "height": 1300})
-    m.page.wait_for_timeout(500)
+    m.page.wait_for_timeout(800)
+    m.noter(m.page.get_by_placeholder("Service Name"), "test-connection-btn", "next-button")
     m.enregistrer("04-connexion")
 
     m.ouvrir("/service/databaseServices/omlab_postgres/ingestions")
@@ -307,7 +306,7 @@ def chapitre_08(m: Manuel) -> None:
 
     m.page.locator("tr[data-row-key$='.national_id'] [data-testid^='classification-tags'] [data-testid='add-tag']").click()
     m.page.wait_for_timeout(500)
-    m.page.keyboard.type("PII")
+    m.page.get_by_placeholder("Search Tags").last.fill("PII")
     m.reposer(1200)
     m.enregistrer("08-poser-etiquette")
 
@@ -415,6 +414,58 @@ def chapitre_16(m: Manuel) -> None:
     m.enregistrer("16-applications")
 
 
+def chapitre_17(m: Manuel) -> None:
+    m.ouvrir("/data-marketplace", hauteur=1000, attente=2500)
+    m.noter(m.page.get_by_text("Chiffre d'affaires mensuel").first, m.page.get_by_text("Ventes", exact=True).first)
+    m.enregistrer("17-marketplace")
+
+    m.ouvrir("/domain/Ventes", hauteur=800)
+    m.noter(m.page.get_by_role("tab", name="Data Products"), m.page.get_by_role("tab", name="Assets"))
+    m.enregistrer("17-domaine")
+
+    m.ouvrir("/dataProduct/ca_mensuel/assets", hauteur=1000, attente=2500)
+    m.noter(m.page.get_by_role("tab", name="Assets"), m.page.get_by_role("tab", name="Input/Output Ports"))
+    m.enregistrer("17-produit")
+
+    m.ouvrir("/metric/ca_mensuel_net", hauteur=800)
+    m.page.get_by_role("tab", name="Expression").click()
+    m.reposer(1000)
+    m.noter(m.page.get_by_role("tab", name="Expression"))
+    m.enregistrer("17-metrique")
+
+    m.ouvrir(f"{ORDERS}/activity_feed/tasks", hauteur=1000, attente=2500)
+    m.noter(m.page.get_by_text("Refonte de raw.orders").first, m.page.get_by_role("tab", name="Activity Feeds & Tasks"))
+    m.enregistrer("17-annonce-taches")
+
+    m.ouvrir("/context-center/articles/lire_les_avoirs", hauteur=900)
+    m.noter(m.page.get_by_text("Data Assets", exact=True).first)
+    m.enregistrer("17-article")
+
+    m.ouvrir("/governance/ontology", hauteur=900, attente=3000)
+    m.enregistrer("17-ontologie")
+
+    m.ouvrir("/workflows", hauteur=900)
+    m.enregistrer("17-workflows")
+
+    m.ouvrir("/settings/governance/intake-forms", hauteur=700)
+    m.enregistrer("17-intake")
+
+    m.ouvrir("/column-bulk-operations", hauteur=900, attente=2500)
+    m.enregistrer("17-colonnes")
+
+    m.ouvrir("/test-library", hauteur=900)
+    m.enregistrer("17-test-library")
+
+    m.ouvrir("/lineage", hauteur=900, attente=3000)
+    m.enregistrer("17-lineage-service")
+
+    m.ouvrir("/data-insights/data-assets", hauteur=1000, attente=3000)
+    m.enregistrer("17-insights")
+
+    m.ouvrir("/settings/apps/McpApplication", hauteur=900)
+    m.enregistrer("17-mcp")
+
+
 CHAPITRES: dict[str, Callable[[Manuel], None]] = {
     nom.removeprefix("chapitre_"): f for nom, f in list(globals().items()) if nom.startswith("chapitre_")
 }
@@ -445,7 +496,7 @@ def main() -> int:
         page.fill("#email", ADMIN)
         page.fill("#password", MOT_DE_PASSE)
         page.click("button[type=submit]")
-        page.wait_for_url("**/my-data**", timeout=30000)
+        page.wait_for_url(lambda url: "/signin" not in url, timeout=30000)
         for numero in demandes:
             print(f"Chapitre {numero}")
             try:

@@ -30,14 +30,15 @@ source:
       type: Profiler
 
       # --- Sur quelle fraction des données profiler --------------------
-      # Cette structure a changé deux fois. En 1.13, elle est à DEUX niveaux :
+      # Cette structure a changé deux fois. Depuis la 1.13, elle est à DEUX niveaux :
       # un type d'échantillonnage, puis sa configuration.
       #
       #   STATIC  : vous imposez la fraction (ci-dessous)
       #   DYNAMIC : OpenMetadata choisit tout seul selon la taille de la table
+      #             (c'est le défaut depuis la 2.0)
       #
       # Les tutoriels plus anciens écrivent `profileSample: 100` à plat, ou
-      # directement sous profileSampleConfig : les deux échouent en 1.13 avec
+      # directement sous profileSampleConfig : les deux échouent en 2.0 avec
       # « Extra parameter ... profileSample ».
       profileSampleConfig:
         sampleConfigType: STATIC

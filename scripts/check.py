@@ -220,6 +220,29 @@ def check_16(c: Check) -> None:
     )
 
 
+def check_17(c: Check) -> None:
+    """Le tour de la 2.x."""
+    c.expect(get("/domains/name/Ventes") is not None, "le domaine Ventes existe")
+
+    produit = get("/dataProducts/name/ca_mensuel/assets")
+    assets = (produit or {}).get("data") or []
+    c.expect(len(assets) == 2, f"le produit ca_mensuel contient les 2 tables ({len(assets)})")
+
+    c.expect(get("/metrics/name/ca_mensuel_net") is not None, "la métrique ca_mensuel_net existe")
+    c.expect(get("/announcements/name/refonte_orders") is not None, "l'annonce refonte_orders existe")
+
+    taches = api("/tasks?limit=100")["data"]
+    incidents = [t for t in taches if t["category"] == "Incident"]
+    c.expect(len(incidents) >= 5, f"les incidents sont des tâches ({len(incidents)})")
+    c.expect(
+        any(t["name"] == "documenter_orders_amount" for t in taches),
+        "la tâche documenter_orders_amount existe",
+    )
+
+    c.expect(get("/contextCenter/pages/name/lire_les_avoirs") is not None, "l'article lire_les_avoirs existe")
+    c.expect(get("/apps/name/McpApplication") is not None, "le serveur MCP est installé")
+
+
 CHECKS = {
     "04": ("Ingestion des métadonnées", check_04),
     "05": ("Profiling", check_05),
@@ -233,6 +256,7 @@ CHECKS = {
     "14": ("SDK Python", check_14),
     "15": ("Connecteur maison", check_15),
     "16": ("Contrat de données", check_16),
+    "17": ("Le tour complet de la 2.x", check_17),
 }
 
 
