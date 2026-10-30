@@ -7,10 +7,11 @@
 
     ./omlab check-docs
 
-Trois contrôles, qui n'ont pas besoin du laboratoire :
+Quatre contrôles, qui n'ont pas besoin du laboratoire :
 
   * aucun schéma en dessin ASCII : ils s'écrivent en Mermaid ;
   * tous les liens relatifs et toutes les images pointent vers un fichier réel ;
+  * aucune capture de cours/img n'est orpheline : chacune sert à un chapitre ;
   * chaque bloc Mermaid passe l'analyseur officiel, dans un vrai navigateur :
     un bloc invalide s'affiche en erreur sur GitHub, sans autre avertissement.
 
@@ -47,6 +48,11 @@ def verifier_fichier(chemin: Path) -> list[str]:
     return erreurs
 
 
+def verifier_captures(fichiers: list[Path]) -> list[str]:
+    textes = "".join(f.read_text() for f in fichiers)
+    return [f"capture orpheline : {c.name}" for c in sorted((ROOT / "cours" / "img").glob("*.png")) if c.name not in textes]
+
+
 def verifier_mermaid(fichiers: list[Path]) -> tuple[int, list[str]]:
     blocs = [(f.name, b) for f in fichiers for b in BLOC.findall(f.read_text())]
     erreurs = []
@@ -70,6 +76,7 @@ def verifier_mermaid(fichiers: list[Path]) -> tuple[int, list[str]]:
 def main() -> int:
     fichiers = [ROOT / "README.md", *sorted((ROOT / "cours").glob("*.md"))]
     erreurs = [e for f in fichiers for e in verifier_fichier(f)]
+    erreurs += verifier_captures(fichiers)
     nombre, erreurs_mermaid = verifier_mermaid(fichiers)
     erreurs += erreurs_mermaid
     for erreur in erreurs:
