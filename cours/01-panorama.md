@@ -106,6 +106,10 @@ d'une entité dans sa hiérarchie, séparé par des points :
 |---|---|---|---|---|
 | service | base | schéma | table | colonne |
 
+L'interface affiche ce chemin en haut de chaque fiche : le fil d'Ariane **(1)** donne le service, la base et le schéma, le titre **(2)** donne le nom de l'entité.
+
+![Le fil d'Ariane et le titre d'une fiche forment le FQN](img/01-fil-ariane.png)
+
 Vous allez le taper des centaines de fois : dans les fichiers YAML, dans les
 appels d'API, dans les scripts. Trois choses à savoir dès maintenant.
 
@@ -151,8 +155,8 @@ ni la même fiabilité :
    C'est là qu'est toute la valeur ajoutée, et c'est ce qui coûte cher.
 3. **L'inférence** — profiling, détection de PII, lineage déduit du SQL.
    Puissant, mais *approximatif* : le chapitre 08 vous montrera un détecteur
-   de données personnelles qui rate un numéro de sécurité sociale et étiquette
-   une date de création comme donnée personnelle. À vérifier, toujours.
+   de données personnelles qui rate un numéro de sécurité sociale et range
+   une date de commande parmi les données personnelles. À vérifier, toujours.
 
 ---
 

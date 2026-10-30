@@ -51,10 +51,10 @@ on réindexe (chapitre 16).
 
 | | Minimum | Ce qu'on a vérifié ici |
 |---|---|---|
-| Docker | 20.10+ | 29.6.2 |
-| Docker Compose | v2.1.1+ | v5.3.1 |
-| RAM allouée à Docker | 6 Gio | 32 Gio |
-| vCPU | 4 | 16 |
+| Docker | 20.10+ | 29.9.2 |
+| Docker Compose | v2.1.1+ | v5.6.1 |
+| RAM allouée à Docker | 6 Gio | 31 Gio |
+| vCPU | 4 | 12 |
 | Disque | ~15 Go | — |
 
 **Sous Windows :** travaillez depuis un terminal **WSL**, avec le dépôt dans le
@@ -108,10 +108,13 @@ tâche planifiée, c'est une panne à retardement.
 ## 4. Vérifier que tout va bien
 
 ```bash
-./omlab status                     # les 6 conteneurs, leur état de santé
+./omlab status                     # 6 conteneurs actifs, leur état de santé
 ./omlab psql "SELECT count(*) FROM raw.orders"   # 3000
 curl -s localhost:8585/api/v1/system/version
 ```
+
+Le septième conteneur, `execute_migrate_all`, joue les migrations puis s'arrête :
+son état `Exited (0)` est normal.
 
 Sur la page d'accueil d'OpenMetadata, vous devez voir un catalogue vide :
 c'est normal, aucune ingestion n'a encore tourné. C'est l'objet du chapitre 04.
@@ -120,7 +123,7 @@ c'est normal, aucune ingestion n'a encore tourné. C'est l'objet du chapitre 04.
 
 | Symptôme | Cause la plus fréquente | Que faire |
 |---|---|---|
-| `port is already allocated` | 8585, 8080, 5433 ou 8010 déjà pris | changez `OMLAB_WEBHOOK_PORT` dans `.env`, ou libérez le port |
+| `port is already allocated` | 8585, 8586, 8080, 5432, 5433, 9200, 9300 ou 8010 déjà pris (5432 surtout, si un Postgres tourne sur la machine) | libérez le port ; seul le webhook se change dans `.env`, via `OMLAB_WEBHOOK_PORT` |
 | Le serveur ne répond jamais | Elasticsearch a été tué faute de RAM | `./omlab logs elasticsearch` ; augmentez la mémoire Docker |
 | `Le démon Docker ne répond pas` | Docker Desktop éteint, ou intégration WSL désactivée | démarrez Docker Desktop, activez l'intégration |
 | Ingestion : `Connection refused` | vous avez écrit `localhost` dans un YAML | depuis un conteneur, c'est `omlab-postgres` et `openmetadata-server` |
@@ -146,6 +149,36 @@ Les logs, dans l'ordre où on les consulte :
 on casse quelque chose, on repart propre en trois minutes. Le seed du
 playground est rejoué automatiquement à la recréation du volume.
 
+## Mode d'emploi : se repérer dans l'interface
+
+**Se connecter.** Ouvrez http://localhost:8585, saisissez l'e-mail **(1)** et le
+mot de passe **(2)**, soit `admin@open-metadata.org` et `admin`, puis cliquez sur
+**Sign In (3)**.
+
+![L'écran de connexion d'OpenMetadata](img/02-connexion.png)
+
+**Trouver son chemin.** Tout part du menu de gauche. Quatre entrées reviendront
+dans tout le cours :
+
+- **Explore (1)** : la recherche et les fiches (chapitre 03) ;
+- **Observability (2)** : qualité, incidents et alertes (chapitres 10 et 12) ;
+- **Govern (3)** : glossaire et classifications (chapitres 07 et 08) ;
+- **Settings (4)** : services, équipes, droits, applications.
+
+![La page d'accueil et le menu de gauche](img/02-accueil.png)
+
+**Les réglages.** **Settings** regroupe l'administration sous forme de tuiles.
+Les chapitres suivants y renvoient par leur nom : *Services*, *Applications*,
+*Notifications*, *Team & User Management*, *Access Control*.
+
+![Les tuiles de la page Settings](img/02-reglages.png)
+
+**Airflow.** http://localhost:8080 (`admin` / `admin`) affiche l'orchestrateur.
+Il contient d'origine six DAG d'exemple, tous en pause. Les workflows déployés
+depuis l'interface d'OpenMetadata s'y ajouteront.
+
+![La liste des DAG dans Airflow](img/02-airflow.png)
+
 ---
 
 ## TP guidé
@@ -155,8 +188,8 @@ playground est rejoué automatiquement à la recréation du volume.
 3. `./omlab status` — les six conteneurs doivent être `running`, dont quatre
    `healthy`.
 4. Ouvrez http://localhost:8585 et connectez-vous.
-5. Ouvrez http://localhost:8080 (Airflow) : la liste des DAG est vide, c'est
-   normal — les workflows déployés depuis l'UI y apparaîtront.
+5. Ouvrez http://localhost:8080 (Airflow) : seuls les six DAG d'exemple y
+   figurent, en pause — les workflows déployés depuis l'UI s'y ajouteront.
 6. `./omlab psql` puis `\dt raw.*` pour voir les tables du terrain de jeu.
 
 **Vérifier :**
