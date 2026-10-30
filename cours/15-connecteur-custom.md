@@ -289,7 +289,7 @@ structure attendue. Si c'est un système interne, gardez-le chez vous.
 
 ## Pour aller plus loin
 
-- [Connecteur personnalisé](https://docs.open-metadata.org/v1.13.x/connectors/custom-connectors)
+- [Connecteur personnalisé](https://docs.open-metadata.org/v2.0.x/connectors/custom-connectors)
 
 ---
 

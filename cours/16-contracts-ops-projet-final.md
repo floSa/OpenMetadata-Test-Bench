@@ -85,7 +85,8 @@ OpenMetadata embarque des **applications** qui tournent côté serveur :
 | `DataContractValidationApplication` | valide les contrats périodiquement |
 | `DataRetentionApplication` | purge les vieux résultats de tests et versions |
 | `AutoPilotApplication` | découvre et configure automatiquement un nouveau service |
-| MCP Server | expose le catalogue aux assistants IA via le protocole MCP |
+| `McpApplication` | expose le catalogue aux assistants IA via le protocole MCP (chapitre 17) |
+| `RdfIndexApp` | alimente le graphe de connaissances, si un triplestore est branché |
 
 Dans l'UI : **Settings → Applications**. Chacune a son calendrier, et le lien
 **Configure** de sa tuile y mène.
@@ -95,7 +96,9 @@ Dans l'UI : **Settings → Applications**. Chacune a son calendrier, et le lien
 **La réindexation est la première chose à connaître.** Symptôme typique : une
 entité existe (accessible par FQN) mais n'apparaît pas dans la recherche. On
 réindexe depuis *Settings → Applications → Search Indexing → Run Now*. À faire
-systématiquement après une montée de version.
+systématiquement après une montée de version. Depuis la 2.0, l'index est toujours
+recréé : il n'y a plus de mode incrémental, et les options `recreateIndex` et
+`useDistributedIndexing` de l'application ont disparu.
 
 `DataRetentionApplication` mérite un réglage explicite : sans purge, les
 résultats de tests et l'historique des versions grossissent indéfiniment.
@@ -124,6 +127,22 @@ La procédure de montée de version, dans l'ordre :
 6. vérifier qu'un workflow d'ingestion passe toujours.
 
 Ne sautez pas de version majeure. Les migrations sont séquentielles.
+
+### Passer de la 1.x à la 2.0
+
+D'après les [notes de migration officielles](https://docs.open-metadata.org/v2.0.x/deployment/upgrade/breaking-changes/overview)
+(ce laboratoire est réinstallé à neuf, il n'a pas rejoué cette migration) :
+
+| Sujet | Ce qui change |
+|---|---|
+| Retour arrière | **aucun rétrogradage automatique** : la sauvegarde est votre seule issue |
+| Base | `thread_entity` est renommée `thread_entity_legacy`, plus de quinze tables créées |
+| API | `/v1/suggestions` disparaît au profit des tâches, les annonces passent à `/v1/announcements` |
+| Recherche | `search_after` devient un paramètre répété, et les URL d'Explore utilisent `currentPage` et `pageSize` |
+| Connexions | le pipeline Databricks passe de `token` à `authType` |
+| Configuration | les réglages d'embeddings passent de `naturalLanguageSearch` à `llmConfiguration` |
+| Ingestion | images en Python 3.12, Great Expectations 1.3 minimum |
+| Orchestrateur | Airflow interne déconseillé au profit de l'orchestrateur Kubernetes |
 
 ### 5. Secrets
 
@@ -252,9 +271,9 @@ avez compris :
 
 ## Pour aller plus loin
 
-- [Contrats de données](https://docs.open-metadata.org/v1.13.x/how-to-guides/data-governance/data-contracts)
-- [Sauvegarde et restauration](https://docs.open-metadata.org/v1.13.x/deployment/backup-restore-metadata)
-- [Montée de version](https://docs.open-metadata.org/v1.13.x/deployment/upgrade)
+- [Contrats de données](https://docs.open-metadata.org/v2.0.x/how-to-guides/data-governance/data-contracts)
+- [Sauvegarde et restauration](https://docs.open-metadata.org/v2.0.x/deployment/backup-restore-metadata)
+- [Montée de version](https://docs.open-metadata.org/v2.0.x/deployment/upgrade)
 
 ## Et maintenant
 
@@ -272,4 +291,4 @@ naturelles :
 ---
 
 **Précédent :** [15 — Connecteur maison](15-connecteur-custom.md) ·
-**Retour au [sommaire](../README.md)**
+**Chapitre suivant :** [17 — Le tour complet de la 2.x](17-tour-complet-2x.md)

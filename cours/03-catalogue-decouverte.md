@@ -56,10 +56,14 @@ Voici la même fiche une fois le cours terminé, avec ses repères :
 | **1** | Fil d'Ariane | le chemin de la table : service, base, schéma |
 | **2** | **Follow** | s'abonner aux changements (section 5) |
 | **3** | Numéro de version | ouvre l'historique (section 4) |
-| **4** | Bandeau de métadonnées | domaine, propriétaire, criticité, rétention |
+| **4** | Bandeau de métadonnées | domaine, propriétaire, criticité, certification, rétention, usage |
 | **5** | Onglets | les vues détaillées listées ci-dessus |
 | **6** | **Description** | le crayon ouvre l'éditeur |
 | **7** | Tableau des colonnes | type, description et étiquettes de chaque colonne |
+
+À droite des colonnes, le panneau **Asset Health** résume l'état de la table : pipeline
+lié, tests, anomalies, contrat. La fiche des vues gagne aussi un onglet
+**View Definition**, qui affiche leur SQL.
 
 Pour l'instant, l'essentiel est vide. C'est exactement le point : un catalogue
 fraîchement ingéré est un squelette. Les descriptions de `raw.customers` et
@@ -209,8 +213,8 @@ définition partagée, réutilisable sur vingt colonnes. Si vous vous surprenez
 
 ## Pour aller plus loin
 
-- [Recherche et découverte](https://docs.open-metadata.org/v1.13.x/how-to-guides/data-discovery)
-- [Fils d'activité et conversations](https://docs.open-metadata.org/v1.13.x/how-to-guides/data-collaboration)
+- [Recherche et découverte](https://docs.open-metadata.org/v2.0.x/how-to-guides/data-discovery)
+- [Fils d'activité et conversations](https://docs.open-metadata.org/v2.0.x/how-to-guides/data-collaboration)
 
 ---
 

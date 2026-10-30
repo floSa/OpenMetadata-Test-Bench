@@ -75,7 +75,7 @@ Au premier lancement, comptez environ **5 Go d'images** à télécharger. Le
 script attend ensuite que le serveur réponde, et affiche les accès :
 
 ```
-OpenMetadata répond : {"version":"1.13.6","revision":"e9ba578...","timestamp":...}
+OpenMetadata répond : {"version":"2.0.7","revision":"744c523...","timestamp":...}
 
   UI OpenMetadata : http://localhost:8585          (admin@open-metadata.org / admin)
   Airflow         : http://localhost:8080          (admin / admin)
@@ -94,11 +94,14 @@ Puis récupérez le jeton dont tous les TP ont besoin :
 `./omlab token` va chercher le jeton de l'**`ingestion-bot`**, pas celui de
 l'administrateur. La différence est de taille :
 
-- le jeton de session d'un humain expire au bout d'une heure ;
-- le jeton d'un bot vit sept jours par défaut, et se renouvelle sans mot de passe.
+- le jeton de session d'un humain expire au bout d'une heure, et la 2.0 limite
+  chaque compte à cinq sessions ouvertes (`AUTHENTICATION_MAX_ACTIVE_SESSIONS_PER_USER`) ;
+- le jeton de l'`ingestion-bot` n'a pas de date d'expiration (`JWTTokenExpiry: Unlimited`),
+  et se relit sans mot de passe humain.
 
 Un script d'automatisation utilise toujours un bot. Un jeton humain dans une
-tâche planifiée, c'est une panne à retardement.
+tâche planifiée, c'est une panne à retardement. L'inverse se paie aussi : un jeton
+sans expiration se protège comme un mot de passe.
 
 > **Sécurité** — Le fichier `.env` contient ce jeton et n'est pas versionné
 > (`.gitignore`). Les YAML de TP, eux, ne contiennent que des `${PLACEHOLDERS}` :
@@ -165,6 +168,9 @@ dans tout le cours :
 - **Govern (3)** : glossaire et classifications (chapitres 07 et 08) ;
 - **Settings (4)** : services, équipes, droits, applications.
 
+Les entrées **Data Marketplace** et **Context Center** sont arrivées avec la 2.0 : le
+[chapitre 17](17-tour-complet-2x.md) les parcourt.
+
 ![La page d'accueil et le menu de gauche](img/02-accueil.png)
 
 **Les réglages.** **Settings** regroupe l'administration sous forme de tuiles.
@@ -224,8 +230,8 @@ est lui-même. C'est l'erreur la plus fréquente des débutants sur ce produit.
 
 ## Pour aller plus loin
 
-- [Déploiement Docker](https://docs.open-metadata.org/v1.13.x/quick-start/local-docker-deployment)
-- [Déploiement Kubernetes](https://docs.open-metadata.org/v1.13.x/deployment/kubernetes)
+- [Déploiement Docker](https://docs.open-metadata.org/v2.0.x/quick-start/local-docker-deployment)
+- [Déploiement Kubernetes](https://docs.open-metadata.org/v2.0.x/deployment/kubernetes)
 
 ---
 

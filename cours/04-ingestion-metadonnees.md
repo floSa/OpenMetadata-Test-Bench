@@ -181,28 +181,29 @@ le YAML y figure déjà. Cliquez sur **Add New Service (1)**.
 
 ![La liste des services de base de données](img/04-services.png)
 
-**2. Choisir le connecteur.** Cherchez `postgres`, sélectionnez la tuile
-**Postgres (1)**, puis **Next (2)**.
+**2. Choisir le connecteur.** Cherchez `postgres`, puis cliquez sur la tuile
+**Postgres (1)** : l'assistant passe aussitôt à l'étape suivante.
 
 ![Le choix du connecteur Postgres](img/04-ajout-service.png)
 
-**3. Nommer le service.** Ce nom **(1)** deviendra le premier segment de tous les
-FQN : c'est le `serviceName` du YAML, et le choix est définitif en pratique.
+**3. Nommer le service et renseigner la connexion.** La 2.0 réunit tout sur une seule
+page. Le **Service Name (1)** deviendra le premier segment de tous les FQN : c'est le
+`serviceName` du YAML, et le choix est définitif en pratique. Le formulaire reprend
+ensuite les champs du bloc `serviceConnection` : `Username`, `Password`, `Host and Port`,
+`Database`. Comme pour le YAML, l'hôte est vu depuis les conteneurs :
+`omlab-postgres:5432`.
 
-![La saisie du nom du service](img/04-nom-service.png)
-
-**4. Renseigner la connexion.** Le formulaire reprend les champs du bloc
-`serviceConnection` : `Username`, `Password`, `Host And Port`, `Database`. Comme
-pour le YAML, l'hôte est vu depuis les conteneurs : `omlab-postgres:5432`.
+**Test Connection (2)** est obligatoire : **Next: What to Ingest (3)** reste grisé tant
+qu'un test n'a pas réussi.
 
 ![Le formulaire de connexion Postgres](img/04-connexion.png)
 
-**5. Tester la connexion.** Une fois le service créé, son onglet **Connection (2)**
+**4. Retester la connexion.** Une fois le service créé, son onglet **Connection (2)**
 propose **Test Connection (3)**, qui rejoue exactement les étapes vues plus haut.
 
 ![L'onglet Connection et son bouton de test](img/04-connexion-test.png)
 
-**6. Planifier.** L'onglet **Agents (1)** de l'écran précédent héberge les workflows
+**5. Planifier.** L'onglet **Agents (1)** de l'écran précédent héberge les workflows
 planifiés : c'est ici que le bouton **Add Agent** crée une ingestion. Une fois
 déployée, elle apparaît dans Airflow (http://localhost:8080) sous forme de DAG.
 
@@ -290,8 +291,8 @@ profiler et les tests, eux, coûtent cher — voir les chapitres 05 et 10.
 
 ## Pour aller plus loin
 
-- [Connecteur Postgres](https://docs.open-metadata.org/v1.13.x/connectors/database/postgres)
-- [Ingestion en ligne de commande](https://docs.open-metadata.org/v1.13.x/connectors/ingestion/workflows/metadata)
+- [Connecteur Postgres](https://docs.open-metadata.org/v2.0.x/connectors/database/postgres)
+- [Ingestion en ligne de commande](https://docs.open-metadata.org/v2.0.x/connectors/ingestion/workflows/metadata)
 
 ---
 

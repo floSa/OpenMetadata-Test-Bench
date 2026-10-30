@@ -108,6 +108,10 @@ Un patch qui réécrit la valeur déjà présente **n'incrémente pas la version
 et ne pollue pas l'historique. Propriété précieuse : un script de
 documentation rejoué tous les jours ne crée pas 365 versions identiques.
 
+Les modifications rapprochées d'un même auteur sont aussi regroupées dans une seule
+version. Sous `./omlab demo`, qui enchaîne les étapes, le premier passage affiche donc
+`0.2 -> 0.2` : attendez une dizaine de minutes pour voir la version monter.
+
 ## 5. L'historique
 
 ```

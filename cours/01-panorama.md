@@ -2,7 +2,7 @@
 
 > **Objectifs** — Savoir dire à quoi sert OpenMetadata et à quoi il ne sert pas ;
 > comprendre le modèle d'entités et la notion de FQN, qui reviendront dans les
-> quinze chapitres suivants.
+> seize chapitres suivants.
 > **Durée** — 25 minutes, sans machine.
 
 ---
@@ -27,7 +27,7 @@ sait *à propos* de vos données — et c'est déjà énorme.
 
 ## 2. Ce qu'OpenMetadata met dans la boîte
 
-Là où beaucoup d'outils s'arrêtent au catalogue, OpenMetadata regroupe cinq
+Là où beaucoup d'outils s'arrêtent au catalogue, OpenMetadata regroupe six
 métiers dans un seul produit :
 
 | Brique | Ce qu'elle apporte | Chapitres |
@@ -37,6 +37,7 @@ métiers dans un seul produit :
 | **Gouvernance** | glossaire, classifications, PII, domaines, rôles | 07, 08, 09 |
 | **Qualité** | tests, incidents, contrats de données | 10, 16 |
 | **Observabilité** | lineage, alertes, analyse d'impact | 06, 11, 12 |
+| **Collaboration et IA** | annonces, tâches, Context Center, serveur MCP | 17 |
 
 Le point d'intérêt du produit n'est pas chaque brique prise isolément — il
 existe de meilleurs outils spécialisés pour chacune. C'est leur **assemblage** :
@@ -60,7 +61,8 @@ OpenMetadata est sous licence Apache 2.0. La société Collate en vend une
 version hébergée avec des fonctions supplémentaires. Attention en lisant la
 documentation en ligne : certaines pages décrivent des fonctions Collate.
 Tout ce qui est présenté dans ce tutoriel tourne sur la version libre — c'est
-vérifié, chaque TP est exécuté.
+vérifié, chaque TP est exécuté. Le [chapitre 17](17-tour-complet-2x.md) dresse la
+liste complète des fonctions, avec ce qui revient à Collate.
 
 ## 3. Le modèle d'entités
 
@@ -90,6 +92,8 @@ Il en existe une par famille de systèmes, toujours bâtie sur le même principe
 | Messagerie | Service → **Topic** |
 | Stockage objet | Service → **Container** |
 | ML | Service → **MlModel** |
+| API | Service → API Collection → **API Endpoint** |
+| Recherche | Service → **Search Index** |
 
 À côté de cet arbre vivent des entités **transverses**, qui se rattachent à
 n'importe quoi : glossaire et termes, classifications et étiquettes, équipes,
@@ -172,8 +176,8 @@ ni la même fiabilité :
 
 ## Pour aller plus loin
 
-- [Modèle d'entités](https://docs.open-metadata.org/v1.13.x/main-concepts/metadata-standard/schemas)
-- [Liste des connecteurs](https://docs.open-metadata.org/v1.13.x/connectors)
+- [Modèle d'entités](https://docs.open-metadata.org/v2.0.x/main-concepts/metadata-standard/schemas)
+- [Liste des connecteurs](https://docs.open-metadata.org/v2.0.x/connectors)
 
 ---
 

@@ -196,7 +196,7 @@ c'est bien plus fiable qu'une saisie humaine.
 
 ## Pour aller plus loin
 
-- [Lineage](https://docs.open-metadata.org/v1.13.x/how-to-guides/data-lineage)
+- [Lineage](https://docs.open-metadata.org/v2.0.x/how-to-guides/data-lineage)
 
 ---
 

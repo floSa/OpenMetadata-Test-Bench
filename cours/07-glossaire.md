@@ -229,7 +229,7 @@ multiplication des glossaires recrée le problème qu'ils devaient résoudre.
 
 ## Pour aller plus loin
 
-- [Glossaires](https://docs.open-metadata.org/v1.13.x/how-to-guides/data-governance/glossary)
+- [Glossaires](https://docs.open-metadata.org/v2.0.x/how-to-guides/data-governance/glossary)
 
 ---
 

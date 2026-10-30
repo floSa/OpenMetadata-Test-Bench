@@ -21,7 +21,8 @@ tourné sur la base**.
 
 Trois sources, par ordre de fiabilité décroissante :
 
-**1. La définition des vues.** Le connecteur lit le SQL d'une vue et en déduit
+**1. La définition des vues.** Le connecteur lit le SQL d'une vue, l'affiche dans
+l'onglet **View Definition** de sa fiche, et en déduit
 ses dépendances. Fiable, gratuit, sans configuration.
 
 **2. Les requêtes observées.** Sur Postgres, OpenMetadata lit la vue
@@ -282,8 +283,8 @@ limites décrites ici sont propres à Postgres.
 
 ## Pour aller plus loin
 
-- [Workflow de lineage](https://docs.open-metadata.org/v1.13.x/connectors/ingestion/lineage)
-- [Usage depuis un journal de requêtes](https://docs.open-metadata.org/v1.13.x/connectors/ingestion/workflows/usage/usage-workflow-query-logs)
+- [Workflow de lineage](https://docs.open-metadata.org/v2.0.x/connectors/ingestion/lineage)
+- [Usage depuis un journal de requêtes](https://docs.open-metadata.org/v2.0.x/connectors/ingestion/workflows/usage/usage-workflow-query-logs)
 
 ---
 

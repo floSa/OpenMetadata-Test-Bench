@@ -32,7 +32,7 @@ workflow à part, `AutoClassification`, avec sa propre sous-commande.
 C'est le changement qui casse le plus de tutoriels trouvés en ligne :
 
 > Les configurations antérieures écrivent `generateSampleData` et
-> `confidence` dans le **profiler**. En 1.13, cela donne :
+> `confidence` dans le **profiler**. En 2.0, cela donne encore :
 > `Extra parameter 'generateSampleData'`.
 
 [`tp/08-classification/auto-classification.yaml`](../tp/08-classification/auto-classification.yaml) :
@@ -52,9 +52,9 @@ sourceConfig:
 ./omlab classify tp/08-classification/auto-classification.yaml
 ```
 
-### Le bloc `processor` obligatoire mais inutile
+### Le bloc `processor` n'est plus nécessaire
 
-Le fichier contient :
+Les exemples écrits pour la 1.x contiennent ce bloc, qui ne sert à rien :
 
 ```yaml
 processor:
@@ -62,16 +62,9 @@ processor:
   config: {}
 ```
 
-Ce bloc ne sert à rien — le workflow construit lui-même ses étapes. Mais son
-absence produit :
-
-```
-Error initializing metadata: 'NoneType' object has no attribute 'model_dump'
-```
-
-Le code lit `config.processor.config` sans vérifier qu'il existe. Message
-cryptique, cause banale : c'est le genre de détail qui coûte une heure quand
-on ne le sait pas.
+En 1.13, son absence provoquait une erreur cryptique (`'NoneType' object has no
+attribute 'model_dump'`). En 2.0.7, le workflow s'en passe : notre fichier ne le
+contient plus, et le garder dans un ancien fichier reste sans effet.
 
 ## 3. Ce que la détection trouve — et ce qu'elle rate
 
@@ -90,6 +83,9 @@ raw.employees
     hired_at         PII.NonSensitive
 raw.orders
     order_date       PII.NonSensitive
+raw.products
+    name             PII.Sensitive
+    created_at       PII.NonSensitive
 ```
 
 Regardez `raw.employees` de près. Cette table contient :
@@ -105,11 +101,12 @@ Regardez `raw.employees` de près. Cette table contient :
 **Le numéro de sécurité sociale n'est pas détecté.** L'e-mail non plus, alors
 qu'il l'est sur `raw.customers`. Le téléphone d'un salarié est classé comme
 **non sensible**. Et à l'inverse, `raw.orders.order_date` — une date de commande,
-qui n'a rien de personnel — reçoit une étiquette PII.
+qui n'a rien de personnel — reçoit une étiquette PII, tout comme `raw.products.name`,
+le nom d'un produit, classé `Sensitive`.
 
-Le résultat change aussi d'une version à l'autre : la 1.13.3 laissait `phone` sans
-étiquette et marquait `raw.products.created_at`, ce que la 1.13.6 ne fait plus. Il
-reste stable d'une exécution à l'autre, mais une montée de version impose de relire.
+Le résultat change aussi d'une version à l'autre : la 1.13.6 ne touchait pas à
+`raw.products`, que la 2.0.7 étiquette sur deux colonnes. Il reste stable d'une
+exécution à l'autre, mais une montée de version impose de relire.
 
 C'est le message central de ce chapitre :
 
@@ -252,7 +249,7 @@ souvent plus fiable que le modèle statistique.
 
 ## Pour aller plus loin
 
-- [Auto-classification et PII](https://docs.open-metadata.org/v1.13.x/how-to-guides/data-governance/classification)
+- [Auto-classification et PII](https://docs.open-metadata.org/v2.0.x/how-to-guides/data-governance/classification)
 
 ---
 

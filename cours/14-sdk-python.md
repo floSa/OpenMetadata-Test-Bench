@@ -249,7 +249,7 @@ les deux exprès.
 **« Faut-il installer le SDK localement ? »**
 Pas nécessaire : `./omlab py` exécute dans le conteneur d'ingestion, qui l'a
 déjà. Pour l'autocomplétion dans votre IDE :
-`pip install "openmetadata-ingestion==1.13.6.0"`.
+`pip install "openmetadata-ingestion==2.0.7.2"`.
 
 **« Comment tester mes scripts ? »**
 Sur cette stack, précisément. `./omlab nuke && ./omlab up` remet un
@@ -258,7 +258,7 @@ avant de lancer un script sur le catalogue de production.
 
 ## Pour aller plus loin
 
-- [SDK Python](https://docs.open-metadata.org/v1.13.x/sdk/python)
+- [SDK Python](https://docs.open-metadata.org/v2.0.x/sdk/python)
 
 ---
 

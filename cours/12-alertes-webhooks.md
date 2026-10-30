@@ -78,6 +78,10 @@ choisi passent. C'est volontaire — l'affinage se fait très bien dans l'UI, qu
 propose la liste des filtres disponibles pour chaque ressource, alors que
 l'API demande de connaître leurs noms exacts.
 
+La 2.0 applique enfin ces filtres aux conversations : une alerte limitée à une entité
+ne reçoit plus celles de tout le catalogue. Si une alerte se tait après une montée de
+version, regardez d'abord ses filtres.
+
 ## 5. Déclencher et lire
 
 ```bash
@@ -226,7 +230,7 @@ sur l'infrastructure. Elles complètent une supervision, ne la remplacent pas.
 
 ## Pour aller plus loin
 
-- [Alertes et notifications](https://docs.open-metadata.org/v1.13.x/how-to-guides/admin-guide/alerts)
+- [Alertes et notifications](https://docs.open-metadata.org/v2.0.x/how-to-guides/admin-guide/alerts)
 
 ---
 

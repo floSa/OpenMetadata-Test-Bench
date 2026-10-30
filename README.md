@@ -1,13 +1,13 @@
 # OpenMetadata — tutoriel complet et exécutable
 
-**Un cours en 16 chapitres pour apprendre tout ce que propose OpenMetadata, avec un laboratoire Docker complet pour tout essayer immédiatement.**
+**Un cours en 17 chapitres pour apprendre tout ce que propose OpenMetadata, avec un laboratoire Docker complet pour tout essayer immédiatement.**
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
-![OpenMetadata](https://img.shields.io/badge/OpenMetadata-1.13.6-6B46F6)
+![OpenMetadata](https://img.shields.io/badge/OpenMetadata-2.0.7-6B46F6)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 
-Une instance OpenMetadata 1.13.6, un entrepôt Postgres « terrain de jeu » peuplé
+Une instance OpenMetadata 2.0.7, un entrepôt Postgres « terrain de jeu » peuplé
 de données réalistes — **défauts compris** —, et un TP exécutable par chapitre.
 Chaque commande de ce dépôt a été exécutée pour de vrai : les sorties reproduites
 dans les chapitres sont celles que vous obtiendrez.
@@ -39,8 +39,8 @@ Le laboratoire empile deux fichiers compose Docker sur le même réseau `app_net
 
 | Service | Image | Rôle |
 |---|---|---|
-| `openmetadata-server` | `docker.getcollate.io/openmetadata/server:1.13.6` | Catalogue, UI, API REST |
-| `postgresql` | `docker.getcollate.io/openmetadata/postgresql:1.13.6` | Base interne d'OpenMetadata |
+| `openmetadata-server` | `docker.getcollate.io/openmetadata/server:2.0.7` | Catalogue, UI, API REST |
+| `postgresql` | `docker.getcollate.io/openmetadata/postgresql:2.0.7` | Base interne d'OpenMetadata |
 | `elasticsearch` | `docker.elastic.co/elasticsearch/elasticsearch:9.3.0` | Index de recherche du catalogue |
 | `ingestion` (Airflow) | fourni par OpenMetadata, ce dépôt monté en volume | Exécute les workflows d'ingestion, de profiling, de tests |
 | `omlab-postgres` | `postgres:16-alpine` | Terrain de jeu à cataloguer — l'entrepôt retail avec ses défauts |
@@ -91,7 +91,8 @@ Puis remplissez le catalogue :
 ./omlab ingest tp/04-ingestion/metadata.yaml
 ```
 
-Et commencez par le [chapitre 01](cours/01-panorama.md).
+Et commencez par le [chapitre 01](cours/01-panorama.md). Pour voir directement le
+catalogue de fin de parcours, `./omlab demo` rejoue tous les TP en cinq minutes environ.
 
 ## Configuration
 
@@ -145,6 +146,7 @@ Chapitre 12 — Alertes : 1/1 — tout est bon
 Chapitre 14 — SDK Python : 3/3 — tout est bon
 Chapitre 15 — Connecteur maison : 2/2 — tout est bon
 Chapitre 16 — Contrat de données : 1/1 — tout est bon
+Chapitre 17 — Le tour complet de la 2.x : 8/8 — tout est bon
 ```
 
 Un chapitre non encore fait apparaît en échec : c'est votre liste de courses.
@@ -165,7 +167,7 @@ passe chaque bloc Mermaid dans l'analyseur officiel.
 |---|---|
 | [`omlab`](omlab) | CLI bash : point d'entrée de toutes les commandes |
 | [`.env.example`](.env.example) | modèle de configuration locale |
-| [`cours/`](cours/) | les 16 chapitres |
+| [`cours/`](cours/) | les 17 chapitres |
 | [`cours/img/`](cours/img/) | les captures d'écran du mode d'emploi, générées par `./omlab captures` |
 | [`tp/`](tp/) | un dossier par chapitre : YAML d'ingestion, scripts Python |
 | [`lib/`](lib/) | `om.py` (client partagé), `csv_connector.py` (chapitre 15) |
@@ -227,6 +229,12 @@ passe chaque bloc Mermaid dans l'analyseur officiel.
 | 15 | [Écrire son propre connecteur](cours/15-connecteur-custom.md) | cataloguer un système non supporté |
 | 16 | [Contrats, exploitation, projet final](cours/16-contracts-ops-projet-final.md) | industrialiser, puis pratiquer seul |
 
+### Module 5 — La vue d'ensemble
+
+| | Chapitre | Ce que vous saurez faire |
+|---|---|---|
+| 17 | [Le tour complet de la 2.x](cours/17-tour-complet-2x.md) | situer chaque fonction, publier un produit de données, interroger le serveur MCP |
+
 **Parcours conseillés**
 
 - *Découverte rapide* (2 h) : 01 → 02 → 03 → 04 → 06
@@ -257,6 +265,7 @@ OpenMetadata
   ./omlab usage    <f.yaml>  workflow d'usage
   ./omlab classify <f.yaml>  échantillonnage + détection de PII
   ./omlab py       <f.py>    exécute un script du SDK
+  ./omlab demo               rejoue tous les TP, du chapitre 04 au 17
 
 Vérifications
   ./omlab check              toutes les vérifications de chapitre
@@ -299,28 +308,30 @@ demi-heure quand on le découvre seul.
 | 2 | Le `/api` manquant à la fin de `workflowConfig.hostPort` | 04 |
 | 3 | Filtres sans ancrage : `raw` attrape aussi `raw_archive` | 04 |
 | 4 | `Success 100 %` avec `Filtered: 12000` — le workflow a réussi à ne rien faire | 04 |
-| 5 | `profileSampleConfig` a changé de structure : deux niveaux en 1.13 | 05 |
+| 5 | `profileSampleConfig` a changé de structure : deux niveaux depuis la 1.13, et `DYNAMIC` par défaut depuis la 2.0 | 05 |
 | 6 | Le profiler ignore les vues par défaut, contrairement au workflow de métadonnées | 05 |
 | 7 | `pg_stat_statements` n'est pas un journal : vide au démarrage, sans horodatage | 06 |
 | 8 | Le workflow d'usage ne met pas à jour l'index : la recherche affiche `0th pctile` jusqu'à la réindexation | 06 |
 | 9 | `generateSampleData` a déménagé dans un workflow `AutoClassification` | 08 |
-| 10 | Un bloc `processor` vide mais **obligatoire**, sous peine d'erreur cryptique | 08 |
-| 11 | La détection de PII rate un numéro de sécurité sociale, classe un téléphone comme non sensible et étiquette une date de commande | 08 |
-| 12 | Un nom d'opération de politique erroné donne « Invalid request format » | 09 |
-| 13 | `columnValuesToBeBetween` ne supporte pas le type `NUMERIC` | 10 |
-| 14 | `strategy: COUNT` avec un `SELECT id` renvoie l'id, pas un compte — silencieusement | 10 |
-| 15 | Les tests s'exécutent sur un échantillon **dynamique** par défaut | 10 |
-| 16 | Un test retiré du YAML continue de tourner : le YAML ne supprime jamais | 10 |
-| 17 | `filteringRules` est calculé : en écriture, c'est `input` | 12 |
-| 18 | `?fields=columns` renvoie les colonnes **sans** leurs étiquettes | 13 |
-| 19 | Un connecteur maison doit créer son service lui-même, sinon 100 % de succès et zéro écriture | 15 |
+| 10 | La détection de PII rate un numéro de sécurité sociale, classe un téléphone comme non sensible et étiquette une date de commande ou un nom de produit | 08 |
+| 11 | Un nom d'opération de politique erroné donne « Invalid request format » | 09 |
+| 12 | `columnValuesToBeBetween` ne supporte pas le type `NUMERIC` | 10 |
+| 13 | `strategy: COUNT` avec un `SELECT id` renvoie l'id, pas un compte — silencieusement | 10 |
+| 14 | Les tests s'exécutent sur un échantillon **dynamique** par défaut | 10 |
+| 15 | Un test retiré du YAML continue de tourner : le YAML ne supprime jamais | 10 |
+| 16 | `filteringRules` est calculé : en écriture, c'est `input` | 12 |
+| 17 | `?fields=columns` renvoie les colonnes **sans** leurs étiquettes | 13 |
+| 18 | Un connecteur maison doit créer son service lui-même, sinon 100 % de succès et zéro écriture | 15 |
+| 19 | Le champ `assets` d'un produit de données est ignoré sans erreur : il faut passer par `/assets/add` | 17 |
+| 20 | `ingestion-bot` n'a pas le droit `CreateTask` : `POST /tasks` répond 403 | 17 |
 
 ## Versions
 
 | Composant | Version |
 |---|---|
-| OpenMetadata | 1.13.6 (publiée le 11 septembre 2026) |
-| `openmetadata-ingestion` | 1.13.6.0 |
+| OpenMetadata | 2.0.7 (publiée le 27 octobre 2026) |
+| `openmetadata-ingestion` | 2.0.7.2 (dans l'image d'ingestion) |
+| Airflow | 3.3.2 (dans l'image d'ingestion) |
 | Elasticsearch | 9.3.0 |
 | Postgres (playground) | 16-alpine |
 
@@ -334,15 +345,17 @@ curl -sL -o docker/docker-compose.openmetadata.yml \
 ```
 
 Attendez-vous à des ajustements : plusieurs pièges listés ci-dessus viennent
-précisément de changements de schéma entre versions mineures.
+précisément de changements de schéma entre versions mineures. Ce dépôt ne met pas à
+jour une instance existante : la 2.0 n'a pas de retour arrière automatique, voyez le
+[chapitre 16](cours/16-contracts-ops-projet-final.md).
 
 Après un changement de version, rejouez les TP et lancez `./omlab check`, puis
 `./omlab captures` pour remettre le mode d'emploi à jour. Les libellés cités dans les
-chapitres viennent de l'interface 1.13.6, où ils sont en anglais.
+chapitres viennent de l'interface 2.0.7, où ils sont en anglais.
 
 ## Ressources
 
-- [Documentation officielle 1.13.x](https://docs.open-metadata.org/v1.13.x)
+- [Documentation officielle 2.0.x](https://docs.open-metadata.org/v2.0.x)
 - Swagger de votre instance : http://localhost:8585/docs
 - [Dépôt GitHub](https://github.com/open-metadata/OpenMetadata)
 - [Slack de la communauté](https://slack.open-metadata.org/)

@@ -67,6 +67,8 @@ d'en ajouter :
 | `inAnyTeam('data_platform')` | l'utilisateur est dans une de ces équipes |
 | `hasAnyRole('Admin')` | il a un de ces rôles |
 | `hasDomain()` / `noDomain()` | l'entité est (ou non) dans son domaine |
+| `matchAnyCertification(...)` | l'entité porte une de ces certifications |
+| `isTaskAssignee()`, `isTaskFiler()`, `isTaskReviewer()` | il est assigné à la tâche, l'a ouverte ou la relit (2.0) |
 | `isBotUser()`, `isAdminUser()`, `isReviewer()` | — |
 
 La liste exacte de votre instance : `GET /api/v1/policies/functions`.
@@ -132,7 +134,8 @@ curl -s -H "Authorization: Bearer $OM_TOKEN" \
 
 Pour `table` : `ViewAll`, `ViewBasic`, `ViewSampleData`, `ViewDataProfile`,
 `ViewQueries`, `ViewTests`, `ViewUsage`, `EditAll`, `EditDescription`,
-`EditTags`, `EditOwners`, `EditLineage`, `EditTier`, `Create`, `Delete`…
+`EditTags`, `EditGlossaryTerms`, `EditOwners`, `EditLineage`, `EditTier`,
+`EditCertification`, `CreateTask`, `EditTask`, `Create`, `Delete`…
 
 ## 5. Les bots
 
@@ -144,6 +147,9 @@ Bonne pratique : **un bot par usage**, avec les droits minimaux. Un bot pour
 l'ingestion, un pour votre script de documentation, un pour votre CI. Quand
 un jeton fuite ou qu'un script part en vrille, on révoque un bot sans arrêter
 le reste.
+
+Le rôle d'un bot limite vraiment ce qu'il fait : `ingestion-bot` n'a pas
+`CreateTask`, si bien que `POST /api/v1/tasks` lui répond 403 (chapitre 17).
 
 ## 6. Domaines et produits de données
 
@@ -157,7 +163,7 @@ Une couche organisationnelle plus récente, orientée *data mesh* :
 
 C'est utile à partir d'une certaine taille d'organisation. En dessous,
 équipes + propriétaires suffisent, et ajouter des domaines ne fait
-qu'ajouter de la cérémonie.
+qu'ajouter de la cérémonie. Le [chapitre 17](17-tour-complet-2x.md) en crée un.
 
 ## Mode d'emploi : où lire les droits
 
@@ -238,7 +244,7 @@ qu'il se reconnecte.
 `AUTHENTICATION_PROVIDER` dans le compose accepte `google`, `okta`, `auth0`,
 `azure`, `custom-oidc`, `saml`, `ldap`. Le sujet est conséquent et n'apporte
 rien à l'apprentissage du produit : ce tutoriel reste en `basic`. Voir la
-[documentation](https://docs.open-metadata.org/v1.13.x/deployment/security).
+[documentation](https://docs.open-metadata.org/v2.0.x/deployment/security).
 
 **« Peut-on masquer complètement une table ? »**
 Oui, avec un `deny` sur `ViewBasic` : l'entité disparaît de la recherche et
@@ -246,7 +252,7 @@ des listes pour les utilisateurs concernés.
 
 ## Pour aller plus loin
 
-- [Rôles et politiques](https://docs.open-metadata.org/v1.13.x/how-to-guides/admin-guide/roles-policies)
+- [Rôles et politiques](https://docs.open-metadata.org/v2.0.x/how-to-guides/admin-guide/roles-policies)
 
 ---
 

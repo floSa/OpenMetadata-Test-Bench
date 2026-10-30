@@ -11,7 +11,7 @@
 
 | Objet | Ce que c'est |
 |---|---|
-| **Test definition** | le *type* de test, fourni par OpenMetadata (25 en 1.13) |
+| **Test definition** | le *type* de test, fourni par OpenMetadata (25 en 2.0) |
 | **Test case** | une *instance* : ce type, sur cette colonne, avec ces paramètres |
 | **Test suite** | l'ensemble des tests d'une table |
 | **Test result** | un résultat horodaté : `Success`, `Failed`, `Aborted` |
@@ -46,8 +46,8 @@ is not compatible with column amount of type NUMERIC
 ```
 
 `amount` est un `numeric(12,2)` Postgres, qu'OpenMetadata mappe sur `NUMERIC`.
-Or `columnValuesToBeBetween` ne déclare supporter que `DECIMAL`, `DOUBLE` et
-`INT`. Sur une colonne `NUMERIC`, seuls **trois** tests sont disponibles :
+Or `columnValuesToBeBetween` accepte `DECIMAL`, `DOUBLE`, `INT` et leurs cousins,
+mais pas `NUMERIC`. Sur une colonne `NUMERIC`, seuls **trois** tests sont disponibles :
 
 - `columnValuesToBeNotNull`
 - `columnValuesToBeUnique`
@@ -199,6 +199,10 @@ stateDiagram-v2
   Resolved --> [*]
 ```
 
+Depuis la 2.0, un incident est une **tâche** de catégorie `Incident` : on le retrouve
+aussi par `GET /api/v1/tasks` (chapitre 17), et l'ancien module qualité de Data
+Insights a disparu au profit de cet écran.
+
 Un incident résolu demande une **cause** : donnée réellement erronée, test mal
 calibré, faux positif. C'est ce qui distingue un outil de qualité d'un simple
 tableau de bord rouge : la trace de ce qu'on a décidé.
@@ -327,8 +331,8 @@ d'une migration : on compare l'ancien et le nouveau système.
 
 ## Pour aller plus loin
 
-- [Qualité de données](https://docs.open-metadata.org/v1.13.x/how-to-guides/data-quality-observability/quality)
-- [Les 25 définitions de tests](https://docs.open-metadata.org/v1.13.x/how-to-guides/data-quality-observability/quality/tests-yaml)
+- [Qualité de données](https://docs.open-metadata.org/v2.0.x/how-to-guides/data-quality-observability/quality)
+- [Les 25 définitions de tests](https://docs.open-metadata.org/v2.0.x/how-to-guides/data-quality-observability/quality/tests-yaml)
 
 ---
 

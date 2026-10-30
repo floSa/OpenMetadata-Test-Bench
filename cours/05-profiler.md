@@ -12,7 +12,7 @@
 |---|---|---|
 | Ce qu'elle lit | le **catalogue système** | les **données elles-mêmes** |
 | SQL exécuté | `SELECT ... FROM information_schema` | `SELECT count(*), min(x), ... FROM votre_table` |
-| Durée sur 9 tables | 1 seconde | une trentaine de secondes |
+| Durée sur 9 tables | quelques secondes | moins d'une minute |
 | Coût sur un entrepôt facturé | négligeable | **réel, et parfois salé** |
 | Fréquence raisonnable | quotidienne | hebdomadaire, ou par échantillon |
 
@@ -57,7 +57,7 @@ profileSampleConfig:
 Cette structure à deux niveaux est récente. Les tutoriels antérieurs à la
 version 1.6 écrivent `profileSample: 100` **à plat**, sous `sourceConfig.config` ;
 ceux de la 1.12 le mettent directement sous `profileSampleConfig`. Les deux
-échouent en 1.13 avec un message qui ne dit pas ce qu'il faut faire :
+échouent encore en 2.0 avec un message qui ne dit pas ce qu'il faut faire :
 
 ```
 Error loading profiler configuration: ...
@@ -71,6 +71,10 @@ Deux modes existent :
 - **`DYNAMIC`** — OpenMetadata choisit selon la taille de la table. Confortable
   pour de l'exploration sur du très gros volume, dangereux si vous croyez
   regarder toutes les lignes.
+
+**La 2.0 a changé le défaut** : sans configuration, le profiler est en `DYNAMIC`, et
+il ne calcule plus la distribution de cardinalité. Une configuration existante est
+conservée ; c'est pourquoi notre fichier écrit `STATIC` noir sur blanc.
 
 `profileSampleType` vaut `PERCENTAGE` (une fraction) ou `ROWS` (un nombre fixe
 de lignes). Sur une table de 4 milliards de lignes, `ROWS: 100000` donne un
@@ -122,7 +126,7 @@ Processed records: 8
 Filtered: 1              ← raw.employees, exclue volontairement
 Workflow Profiler Summary:
 Processed records: 166   ← 166 métriques calculées
-Workflow finished in time: 38s 416ms
+Workflow finished in time: 49s 431ms
 ```
 
 Dans l'UI, ouvrez `raw.customers`, onglet **Data Observability**. Vous
@@ -224,7 +228,7 @@ d'auto-classification — c'est le chapitre 08.
 
 ## Pour aller plus loin
 
-- [Workflow de profiling](https://docs.open-metadata.org/v1.13.x/how-to-guides/data-quality-observability/profiler)
+- [Workflow de profiling](https://docs.open-metadata.org/v2.0.x/how-to-guides/data-quality-observability/profiler)
 
 ---
 
