@@ -158,9 +158,10 @@ Le classement obtenu :
 ```
 
 Le `p` est un **rang en percentile** : `p88` signifie que cette table est plus
-consultée que 88 % des autres. C'est ce chiffre qui alimente le tri « les plus
-populaires » de la recherche — et qui donne un argument objectif quand
-quelqu'un veut supprimer une table.
+consultée que 88 % des autres. C'est un argument objectif quand quelqu'un veut
+supprimer une table. Ne le confondez pas avec le tri **Popularity** de la recherche :
+celui-ci ne suit pas strictement ce chiffre. Sur le labo, `customers` (p88) y précède
+`dim_customer` (p0), puis `employees` (p33).
 
 L'onglet **Queries** d'une table liste les requêtes qui l'ont touchée. Pour
 comprendre comment une table est *vraiment* utilisée, c'est plus instructif
@@ -193,9 +194,9 @@ avec sa durée.
 
 ![Les requêtes observées sur raw.customers](img/06-requetes.png)
 
-**La popularité.** Dans **Explore**, le tri **Popularity (1)** classe les assets, et
-chaque résultat affiche son percentile d'usage. Ces chiffres viennent de l'index de
-recherche : voyez le piège ci-dessous si tout reste à `0th pctile`.
+**La popularité.** Dans **Explore**, chaque résultat affiche son percentile d'usage, et
+le menu **Popularity (1)** règle le tri. Ces chiffres viennent de l'index de recherche :
+voyez le piège ci-dessous si tout reste à `0th pctile`.
 
 ![Le tri par popularité dans Explore](img/06-popularite.png)
 
@@ -213,8 +214,8 @@ recherche : voyez le piège ci-dessous si tout reste à `0th pctile`.
    Remontez jusqu'à `raw.orders`.
 2. Cliquez sur **Layers → Column** et suivez le chemin de `amount`.
 3. Ouvrez `raw.customers`, onglet **Queries**.
-4. Réindexez (voir *Pièges & FAQ*), triez la recherche par popularité et
-   retrouvez les percentiles ci-dessus.
+4. Réindexez (voir *Pièges & FAQ*), cherchez `omlab` dans **Explore** et retrouvez
+   sur chaque résultat le percentile du classement ci-dessus.
 
 **Vérifier :**
 
