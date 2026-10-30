@@ -4,10 +4,10 @@
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
-![OpenMetadata](https://img.shields.io/badge/OpenMetadata-1.13.3-6B46F6)
+![OpenMetadata](https://img.shields.io/badge/OpenMetadata-1.13.6-6B46F6)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 
-Une instance OpenMetadata 1.13.3, un entrepôt Postgres « terrain de jeu » peuplé
+Une instance OpenMetadata 1.13.6, un entrepôt Postgres « terrain de jeu » peuplé
 de données réalistes — **défauts compris** —, et un TP exécutable par chapitre.
 Chaque commande de ce dépôt a été exécutée pour de vrai : les sorties reproduites
 dans les chapitres sont celles que vous obtiendrez.
@@ -34,8 +34,8 @@ Le laboratoire empile deux fichiers compose Docker sur le même réseau `app_net
 
 | Service | Image | Rôle |
 |---|---|---|
-| `openmetadata-server` | `docker.getcollate.io/openmetadata/server:1.13.3` | Catalogue, UI, API REST |
-| `postgresql` | `docker.getcollate.io/openmetadata/postgresql:1.13.3` | Base interne d'OpenMetadata |
+| `openmetadata-server` | `docker.getcollate.io/openmetadata/server:1.13.6` | Catalogue, UI, API REST |
+| `postgresql` | `docker.getcollate.io/openmetadata/postgresql:1.13.6` | Base interne d'OpenMetadata |
 | `elasticsearch` | `docker.elastic.co/elasticsearch/elasticsearch:9.3.0` | Index de recherche du catalogue |
 | `ingestion` (Airflow) | fourni par OpenMetadata, ce dépôt monté en volume | Exécute les workflows d'ingestion, de profiling, de tests |
 | `omlab-postgres` | `postgres:16-alpine` | Terrain de jeu à cataloguer — l'entrepôt retail avec ses défauts |
@@ -298,8 +298,8 @@ demi-heure quand on le découvre seul.
 
 | Composant | Version |
 |---|---|
-| OpenMetadata | 1.13.3 (publiée le 31 juillet 2026) |
-| `openmetadata-ingestion` | 1.13.3.0 |
+| OpenMetadata | 1.13.6 (publiée le 11 septembre 2026) |
+| `openmetadata-ingestion` | 1.13.6.0 |
 | Elasticsearch | 9.3.0 |
 | Postgres (playground) | 16-alpine |
 

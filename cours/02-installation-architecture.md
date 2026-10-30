@@ -75,7 +75,7 @@ Au premier lancement, comptez environ **5 Go d'images** à télécharger. Le
 script attend ensuite que le serveur réponde, et affiche les accès :
 
 ```
-OpenMetadata répond : {"version":"1.13.3","revision":"255f669...","timestamp":...}
+OpenMetadata répond : {"version":"1.13.6","revision":"e9ba578...","timestamp":...}
 
   UI OpenMetadata : http://localhost:8585          (admin@open-metadata.org / admin)
   Airflow         : http://localhost:8080          (admin / admin)

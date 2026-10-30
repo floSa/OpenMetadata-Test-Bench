@@ -45,7 +45,7 @@ need_docker() {
 # =====================================================================
 cmd_up() {
   need_docker
-  c_head "Démarrage de la stack (OpenMetadata 1.13.3 + playground)"
+  c_head "Démarrage de la stack (OpenMetadata 1.13.6 + playground)"
   c_warn "Au premier lancement, environ 5 Go d'images sont téléchargés. Patience."
   dc up -d
   cmd_wait

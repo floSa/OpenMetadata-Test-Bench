@@ -235,7 +235,7 @@ les deux exprès.
 **« Faut-il installer le SDK localement ? »**
 Pas nécessaire : `./omlab py` exécute dans le conteneur d'ingestion, qui l'a
 déjà. Pour l'autocomplétion dans votre IDE :
-`pip install "openmetadata-ingestion==1.13.3.0"`.
+`pip install "openmetadata-ingestion==1.13.6.0"`.
 
 **« Comment tester mes scripts ? »**
 Sur cette stack, précisément. `./omlab nuke && ./omlab up` remet un
