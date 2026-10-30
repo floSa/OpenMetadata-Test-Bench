@@ -104,6 +104,8 @@ class Manuel:
 
     def enregistrer(self, nom: str, cadre: tuple[int, int, int, int] | None = None) -> None:
         chemin = SORTIE / f"{nom}.png"
+        self.page.mouse.move(0, 0)  # une souris laissée sur un nom ouvre une carte de profil
+        self.page.wait_for_timeout(400)
         options = {"x": cadre[0], "y": cadre[1], "width": cadre[2], "height": cadre[3]} if cadre else None
         self.page.screenshot(path=chemin, clip=options, animations="disabled")
         # 256 couleurs suffisent à une interface et divisent le poids par trois ;
@@ -114,6 +116,7 @@ class Manuel:
         print(f"  {nom}.png")
 
     def recadrer_lineage(self) -> None:
+        self.tid("toggle-mind-map").click()  # la mini-carte masque le bas du graphe
         self.tid("fit-screen").click()
         self.page.get_by_text("Fit to screen").click()
         self.page.wait_for_timeout(1000)
@@ -242,7 +245,12 @@ def chapitre_06(m: Manuel) -> None:
     m.tid("lineage-layer-column-btn").click()
     m.page.keyboard.press("Escape")  # le menu des calques bloque le reste de l'écran
     m.page.wait_for_timeout(2000)
-    m.recadrer_lineage()
+    m.tid("fit-screen").click()
+    m.page.get_by_text("Fit to screen").click()
+    m.page.wait_for_timeout(1000)
+    m.tid(f"column-{SERVICE}.analytics.v_revenue_monthly.revenue").click(force=True)
+    m.page.mouse.move(700, 5)
+    m.page.wait_for_timeout(1000)
     m.enregistrer("06-lineage-colonnes")
 
     m.ouvrir(f"{ORDERS}/lineage", hauteur=1000, attente=2500)
@@ -254,7 +262,7 @@ def chapitre_06(m: Manuel) -> None:
     m.noter("table_queries")
     m.enregistrer("06-requetes")
 
-    m.ouvrir("/explore/tables?search=*", hauteur=1000, attente=2500)
+    m.ouvrir("/explore/tables?search=omlab", hauteur=1000, attente=2500)
     m.noter(m.page.get_by_text("Popularity").first)
     m.enregistrer("06-popularite")
 
