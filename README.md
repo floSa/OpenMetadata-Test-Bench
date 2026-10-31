@@ -148,6 +148,13 @@ Chapitre 14 — SDK Python : 3/3 — tout est bon
 Chapitre 15 — Connecteur maison : 2/2 — tout est bon
 Chapitre 16 — Contrat de données : 1/1 — tout est bon
 Chapitre 17 — Le tour complet de la 2.x : 8/8 — tout est bon
+Chapitre 18 — Collaborer sur une fiche : 6/6 — tout est bon
+Chapitre 19 — Import et export en masse : 3/3 — tout est bon
+Chapitre 20 — La qualité avancée : 6/6 — tout est bon
+Chapitre 21 — La gouvernance avancée : 6/6 — tout est bon
+Chapitre 22 — L'administration : 5/5 — tout est bon
+Chapitre 23 — Au-delà de Postgres : 10/10 — tout est bon
+Chapitre 24 — Standards ouverts et agents : 3/3 — tout est bon
 ```
 
 Un chapitre non encore fait apparaît en échec : c'est votre liste de courses.
@@ -185,6 +192,12 @@ passe chaque bloc Mermaid dans l'analyseur officiel.
 | Apache Airflow | Orchestrateur des workflows d'ingestion | Apache License 2.0 |
 | Python | Scripts des TP et récepteur de webhooks | PSF License |
 | Docker Compose | Orchestration des conteneurs | Apache License 2.0 |
+| Redpanda | Source Kafka du chapitre 23 | Business Source License 1.1 |
+| S3Mock (Adobe) | Source S3 du chapitre 23 | Apache License 2.0 |
+| MLflow | Source de modèles du chapitre 23 | Apache License 2.0 |
+| Metabase | Source de tableaux de bord du chapitre 23 | AGPLv3 |
+| dbt Core | Modèle du chapitre 23 | Apache License 2.0 |
+| SDK MCP Python | Client du chapitre 24 | MIT |
 | **Ce projet** | Cours, TP, laboratoire, scripts | MIT — Copyright (c) 2026 floSa |
 
 ## Le parcours
@@ -249,7 +262,9 @@ passe chaque bloc Mermaid dans l'analyseur officiel.
 | 24 | [Standards ouverts et agents](cours/24-standards-agents.md) | contrats ODCS, vrai client MCP, mémoires |
 
 **Couverture mesurée** avec `./omlab couverture`, sur les 184 pages *how-to* de la documentation
-2.0, les familles de connecteurs et les sujets de déploiement : COUVERTURE
+2.0, les familles de connecteurs et les sujets de déploiement. Sur 204 sujets, 69 % sont
+exécutés par un TP, 11 % ouverts à l'écran et 20 % seulement expliqués, ce que le chapitre dit
+alors. Une page comptée n'implique pas que toutes ses options ont été essayées.
 
 **Parcours conseillés**
 
@@ -364,6 +379,12 @@ demi-heure quand on le découvre seul.
 | Airflow | 3.3.2 (dans l'image d'ingestion) |
 | Elasticsearch | 9.3.0 |
 | Postgres (playground) | 16-alpine |
+| Redpanda (chapitre 23) | 24.2.7 |
+| S3Mock (chapitre 23) | 3.12.0 |
+| MLflow (chapitre 23) | 3.4.0 |
+| Metabase (chapitre 23) | 0.50.36 |
+| dbt-postgres (chapitre 23) | 1.9.0 |
+| SDK MCP Python (chapitre 24) | 1.26.0 |
 
 **Changer de version :** modifiez le tag dans
 [docker/docker-compose.openmetadata.yml](docker/docker-compose.openmetadata.yml), ou remplacez le fichier par l'asset
