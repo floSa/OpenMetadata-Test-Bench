@@ -1,0 +1,25 @@
+# Chapitre 23 — un registre de modèles
+#   ./omlab ingest tp/23-sources/mlflow.yaml
+
+source:
+  type: mlflow
+  serviceName: omlab_mlflow
+  serviceConnection:
+    config:
+      type: Mlflow
+      trackingUri: http://omlab-mlflow:5000
+      registryUri: http://omlab-mlflow:5000
+  sourceConfig:
+    config:
+      type: MlModelMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

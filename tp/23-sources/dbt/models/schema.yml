@@ -1,0 +1,19 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: orders
+      - name: customers
+
+models:
+  - name: ventes_par_pays
+    description: "Ventes terminées par pays. Modèle dbt : cette description arrive dans le catalogue."
+    columns:
+      - name: country
+        description: "Pays du client, vide pour l'import de 2023."
+      - name: nb_commandes
+        description: "Nombre de commandes terminées."
+        tests:
+          - not_null

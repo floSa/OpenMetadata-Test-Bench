@@ -1,0 +1,28 @@
+# Chapitre 23 — un stockage objet compatible S3
+#   ./omlab ingest tp/23-sources/s3.yaml
+
+source:
+  type: s3
+  serviceName: omlab_s3
+  serviceConnection:
+    config:
+      type: S3
+      awsConfig:
+        awsAccessKeyId: omlab
+        awsSecretAccessKey: omlab_pwd
+        awsRegion: us-east-1
+        endPointURL: http://omlab-s3:9090
+  sourceConfig:
+    config:
+      type: StorageMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

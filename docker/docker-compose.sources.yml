@@ -1,0 +1,58 @@
+# =====================================================================
+# Les autres familles de sources, pour le chapitre 23
+# =====================================================================
+#   ./omlab sources up      démarre ces conteneurs (environ 2 Go de RAM en plus)
+#   ./omlab sources down    les arrête
+#
+# Séparés du labo de base : les chapitres 01 à 22 n'en ont pas besoin.
+# =====================================================================
+
+services:
+  omlab-redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+    container_name: omlab_redpanda
+    command:
+      - redpanda start --smp 1 --memory 512M --overprovisioned --mode dev-container
+      - --kafka-addr 0.0.0.0:9092 --advertise-kafka-addr omlab-redpanda:9092
+      - --schema-registry-addr 0.0.0.0:8081
+    networks: [app_net]
+
+  # Un faux S3 léger : il accepte n'importe quels identifiants, ce qui suffit ici.
+  omlab-s3:
+    image: adobe/s3mock:3.12.0
+    container_name: omlab_s3
+    environment:
+      initialBuckets: omlab-lac
+    networks: [app_net]
+
+  omlab-mlflow:
+    image: ghcr.io/mlflow/mlflow:v3.4.0
+    container_name: omlab_mlflow
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////tmp/mlflow.db --default-artifact-root /tmp/artefacts
+    networks: [app_net]
+
+  omlab-metabase:
+    image: metabase/metabase:v0.50.36
+    container_name: omlab_metabase
+    networks: [app_net]
+
+  # Sert le contrat OpenAPI lu par le connecteur d'API.
+  omlab-fichiers:
+    image: python:3.12-alpine
+    container_name: omlab_fichiers
+    command: python -m http.server 8000 --directory /srv
+    volumes:
+      - ../tp/23-sources/api:/srv:ro
+    networks: [app_net]
+
+  # Exécute le projet dbt, une fois, à la demande : `./omlab sources dbt`.
+  omlab-dbt:
+    image: ghcr.io/dbt-labs/dbt-postgres:1.9.0
+    container_name: omlab_dbt
+    profiles: [outils]
+    working_dir: /projet
+    environment:
+      DBT_PROFILES_DIR: /projet
+    volumes:
+      - ../tp/23-sources/dbt:/projet
+    networks: [app_net]

@@ -1,0 +1,20 @@
+{
+  "openapi": "3.0.0",
+  "info": {"title": "API de la boutique", "version": "1.0.0"},
+  "tags": [{"name": "commandes", "description": "Lecture des commandes."}],
+  "paths": {
+    "/commandes/{id}": {
+      "get": {
+        "tags": ["commandes"],
+        "operationId": "lireCommande",
+        "summary": "Lire une commande",
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {"200": {"description": "La commande",
+          "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Commande"}}}}}
+      }
+    }
+  },
+  "components": {"schemas": {"Commande": {"type": "object", "properties": {
+    "order_id": {"type": "integer"}, "amount": {"type": "number"}, "status": {"type": "string"}
+  }}}}
+}

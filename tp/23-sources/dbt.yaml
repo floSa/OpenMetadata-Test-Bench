@@ -1,0 +1,31 @@
+# Chapitre 23 — les modèles dbt, rattachés aux tables qu'ils produisent
+#   ./omlab sources dbt
+#   ./omlab ingest tp/04-ingestion/metadata.yaml      (le catalogue doit connaître la table)
+#   ./omlab ingest tp/23-sources/dbt.yaml
+#
+# Ce workflow n'interroge ni dbt ni la base : il lit les fichiers du dossier target/.
+
+source:
+  type: dbt
+  serviceName: ${OMLAB_SERVICE_NAME}
+  sourceConfig:
+    config:
+      type: DBT
+      dbtConfigSource:
+        dbtConfigType: local
+        dbtCatalogFilePath: /omlab/tp/23-sources/dbt/target/catalog.json
+        dbtManifestFilePath: /omlab/tp/23-sources/dbt/target/manifest.json
+        dbtRunResultsFilePath: /omlab/tp/23-sources/dbt/target/run_results.json
+      dbtUpdateDescriptions: true
+      includeTags: true
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

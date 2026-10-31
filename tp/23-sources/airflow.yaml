@@ -1,0 +1,26 @@
+# Chapitre 23 — les DAG d'Airflow, lus dans sa base
+#   ./omlab ingest tp/23-sources/airflow.yaml
+
+source:
+  type: airflow
+  serviceName: omlab_airflow
+  serviceConnection:
+    config:
+      type: Airflow
+      hostPort: http://localhost:8080
+      connection:
+        type: Backend
+  sourceConfig:
+    config:
+      type: PipelineMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

@@ -1,0 +1,9 @@
+name: omlab_dbt
+version: "1.0"
+profile: omlab
+model-paths: [models]
+target-path: target
+models:
+  omlab_dbt:
+    +schema: dbt
+    +materialized: table

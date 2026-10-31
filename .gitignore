@@ -11,3 +11,7 @@ __pycache__/
 .venv/
 
 *.log
+
+# Sorties de dbt
+tp/23-sources/dbt/target/
+tp/23-sources/dbt/logs/

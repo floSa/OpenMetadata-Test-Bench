@@ -1,0 +1,25 @@
+# Chapitre 23 — une API décrite en OpenAPI
+#   ./omlab ingest tp/23-sources/api.yaml
+
+source:
+  type: rest
+  serviceName: omlab_api
+  serviceConnection:
+    config:
+      type: Rest
+      openAPISchemaConnection:
+        openAPISchemaURL: http://omlab-fichiers:8000/boutique.json
+  sourceConfig:
+    config:
+      type: ApiMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

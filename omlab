@@ -18,6 +18,7 @@ cd "$ROOT"
 PROJECT=omlab
 OM_COMPOSE="docker/docker-compose.openmetadata.yml"
 PG_COMPOSE="docker/docker-compose.playground.yml"
+SRC_COMPOSE="docker/docker-compose.sources.yml"
 
 # Valeurs par défaut, surchargeables dans .env
 OM_HOST="${OM_HOST:-http://localhost:8585}"
@@ -26,6 +27,7 @@ OM_ADMIN_PASSWORD="${OM_ADMIN_PASSWORD:-admin}"
 [ -f .env ] && set -a && . ./.env && set +a
 
 dc() { docker compose -p "$PROJECT" -f "$OM_COMPOSE" -f "$PG_COMPOSE" "$@"; }
+dc_src() { dc -f "$SRC_COMPOSE" "$@"; }
 
 c_ok()   { printf '\033[32m%s\033[0m\n' "$*"; }
 c_warn() { printf '\033[33m%s\033[0m\n' "$*"; }
@@ -229,6 +231,26 @@ cmd_check_docs() {
   uv run -q --script scripts/check_docs.py "$@"
 }
 
+# ---------------------------------------------------------------------
+# Les autres familles de sources du chapitre 23
+# ---------------------------------------------------------------------
+cmd_sources() {
+  case "${1:-}" in
+    up)
+      c_head "Démarrage des sources : Kafka, S3, MLflow, Metabase, fichiers"
+      dc_src up -d omlab-redpanda omlab-s3 omlab-mlflow omlab-metabase omlab-fichiers ;;
+    dbt)
+      c_head "dbt run, dbt docs generate, dbt test"
+      dc_src run --rm omlab-dbt run
+      dc_src run --rm omlab-dbt docs generate
+      # En dernier : chaque commande réécrit run_results.json, et le catalogue y lit les tests.
+      dc_src run --rm omlab-dbt test ;;
+    down)
+      dc_src stop omlab-redpanda omlab-s3 omlab-mlflow omlab-metabase omlab-fichiers ;;
+    *) c_err "Usage : ./omlab sources up|dbt|down"; exit 1 ;;
+  esac
+}
+
 # =====================================================================
 cmd_help() {
   cat <<'EOF'
@@ -257,6 +279,11 @@ omlab — laboratoire OpenMetadata
     ./omlab py       <script.py>      exécute un script du SDK
     ./omlab demo               rejoue tous les TP, du chapitre 04 au 17
 
+  Autres sources (chapitre 23)
+    ./omlab sources up         démarre Kafka, S3, MLflow, Metabase
+    ./omlab sources dbt        exécute le projet dbt du TP
+    ./omlab sources down       arrête ces conteneurs
+
   Vérifications
     ./omlab check              lance toutes les vérifications de chapitre
     ./omlab check 04           lance celle du chapitre 04
@@ -271,7 +298,7 @@ EOF
 main() {
   local cmd="${1:-help}"; shift || true
   case "$cmd" in
-    up|wait|down|nuke|status|logs|psql|traffic|token|ingest|profile|test|usage|classify|app|py|demo|check|captures|help)
+    up|wait|down|nuke|status|logs|psql|traffic|token|ingest|profile|test|usage|classify|app|py|demo|check|captures|sources|help)
       "cmd_$cmd" "$@" ;;
     check-docs) cmd_check_docs "$@" ;;
     *) c_err "Commande inconnue : $cmd"; echo; cmd_help; exit 1 ;;

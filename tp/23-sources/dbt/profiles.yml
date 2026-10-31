@@ -1,0 +1,12 @@
+omlab:
+  target: lab
+  outputs:
+    lab:
+      type: postgres
+      host: omlab-postgres
+      port: 5432
+      user: omlab
+      password: omlab_pwd
+      dbname: omlab
+      schema: analytics
+      threads: 2

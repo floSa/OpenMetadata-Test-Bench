@@ -1,0 +1,26 @@
+# Chapitre 23 — un outil de tableaux de bord
+#   ./omlab ingest tp/23-sources/metabase.yaml
+
+source:
+  type: metabase
+  serviceName: omlab_metabase
+  serviceConnection:
+    config:
+      type: Metabase
+      username: admin@omlab.example
+      password: Metabase-2026!tuto
+      hostPort: http://omlab-metabase:3000
+  sourceConfig:
+    config:
+      type: DashboardMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

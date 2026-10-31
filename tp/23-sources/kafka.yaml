@@ -1,0 +1,25 @@
+# Chapitre 23 — un courtier de messages compatible Kafka
+#   ./omlab ingest tp/23-sources/kafka.yaml
+
+source:
+  type: kafka
+  serviceName: omlab_kafka
+  serviceConnection:
+    config:
+      type: Kafka
+      bootstrapServers: omlab-redpanda:9092
+      schemaRegistryURL: http://omlab-redpanda:8081
+  sourceConfig:
+    config:
+      type: MessagingMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

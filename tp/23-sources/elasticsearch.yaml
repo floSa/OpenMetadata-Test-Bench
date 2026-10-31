@@ -1,0 +1,24 @@
+# Chapitre 23 — le moteur de recherche
+#   ./omlab ingest tp/23-sources/elasticsearch.yaml
+
+source:
+  type: elasticsearch
+  serviceName: omlab_elastic
+  serviceConnection:
+    config:
+      type: ElasticSearch
+      hostPort: http://elasticsearch:9200
+  sourceConfig:
+    config:
+      type: SearchMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

@@ -50,6 +50,7 @@ source:
         includes:
           - "^raw$"
           - "^analytics$"
+          - "^analytics_dbt$"
 
       # Exemple d'exclusion : on ne catalogue pas les tables temporaires
       tableFilterPattern:
