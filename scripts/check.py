@@ -369,7 +369,8 @@ def check_24(c: Check) -> None:
     admin = jeton_admin()
     contrats = api("/dataContracts?limit=50&fields=entity", token=admin)["data"]
     contrat = next((x for x in contrats if x["name"] == "contrat_products"), {})
-    c.expect((contrat.get("entity") or {}).get("name") == "products", "le contrat ODCS est rattaché à raw.products")
+    products = api(f"/tables/name/{fqn('raw', 'products')}")
+    c.expect((contrat.get("entity") or {}).get("id") == products["id"], "le contrat ODCS est rattaché à raw.products")
     nb = len(contrat.get("schema") or [])
     c.expect(nb == 2, f"il promet {nb} colonnes")
     memoires = api("/contextCenter/memories?limit=20", token=admin)["data"]
