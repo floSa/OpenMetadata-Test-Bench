@@ -8,6 +8,7 @@ Rien de spécifique à OpenMetadata ici : ce sont les gestes habituels d'une éq
 
 import io
 import json
+import time
 import urllib.request
 
 import boto3
@@ -68,7 +69,12 @@ print("MLflow   : 1 modèle enregistré")
 # --- Metabase : l'assistant d'installation, une base, une question, un tableau de bord -
 MB = "http://omlab-metabase:3000/api"
 UTILISATEUR, MOT_DE_PASSE = "admin@omlab.example", "Metabase-2026!tuto"
-proprietes = appel(f"{MB}/session/properties")
+for _ in range(40):  # Metabase met une à deux minutes à démarrer
+    try:
+        proprietes = appel(f"{MB}/session/properties")
+        break
+    except OSError:
+        time.sleep(5)
 if not proprietes.get("has-user-setup"):
     appel(f"{MB}/setup", {
         "token": proprietes["setup-token"],

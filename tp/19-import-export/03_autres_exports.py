@@ -4,6 +4,7 @@
     ./omlab py tp/19-import-export/03_autres_exports.py
 """
 
+import json
 import sys
 
 sys.path.insert(0, "/omlab")
@@ -25,3 +26,8 @@ EXPORTS = {
 for titre, route in EXPORTS.items():
     lignes = texte(route, token=admin).splitlines()
     print(f"{titre:<24} {len(lignes) - 1:>4} lignes  [{lignes[0][:58]}...]")
+
+# Les tests se réimportent aussi : modifier un seuil dans le CSV suffit à l'appliquer.
+tests = texte(f"/dataQuality/testCases/name/{ORDERS}/export", token=admin)
+res = json.loads(texte(f"/dataQuality/testCases/name/{ORDERS}/import?dryRun=true", "PUT", tests, token=admin))
+print(f"\nTests réimportés (simulation) : {res['status']}, {res['numberOfRowsPassed']}/{res['numberOfRowsProcessed']} lignes")

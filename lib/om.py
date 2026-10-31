@@ -143,12 +143,18 @@ def api(
         raise SystemExit(f"{HOST} injoignable ({exc.reason}). La stack tourne-t-elle ?") from exc
 
 
-def texte(path: str, method: str = "GET", corps: str | None = None, token: str | None = None) -> str:
+def texte(
+    path: str,
+    method: str = "GET",
+    corps: str | None = None,
+    token: str | None = None,
+    content_type: str = "text/plain",
+) -> str:
     """Comme ``api()``, pour les routes d'import et d'export : le corps est du CSV, pas du JSON."""
     url = f"{HOST}/api/v1/{path.lstrip('/')}"
     req = urllib.request.Request(url, data=corps.encode() if corps is not None else None, method=method)
     # Sur ces routes, un GET déclaré en text/plain reçoit un 415.
-    req.add_header("Content-Type", "text/plain" if corps is not None else "application/json")
+    req.add_header("Content-Type", content_type if corps is not None else "application/json")
     req.add_header("Authorization", f"Bearer {token or _require_token()}")
     try:
         with urllib.request.urlopen(req, timeout=60) as resp:
