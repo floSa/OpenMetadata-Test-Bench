@@ -6,6 +6,12 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![OpenMetadata](https://img.shields.io/badge/OpenMetadata-2.0.7-6B46F6)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![Elasticsearch](https://img.shields.io/badge/Elasticsearch-9.3.0-005571?logo=elasticsearch&logoColor=white)
+![Airflow](https://img.shields.io/badge/Airflow-3.3.2-017CEE?logo=apacheairflow&logoColor=white)
+![MLflow](https://img.shields.io/badge/MLflow-3.17.2-0194E2?logo=mlflow&logoColor=white)
+![dbt](https://img.shields.io/badge/dbt-1.9.0-FF694B?logo=dbt&logoColor=white)
+![Metabase](https://img.shields.io/badge/Metabase-0.50.36-509EE3?logo=metabase&logoColor=white)
+![Redpanda](https://img.shields.io/badge/Redpanda-24.2.7-E2401B?logo=apachekafka&logoColor=white)
 
 Une instance OpenMetadata 2.0.7, un entrepôt Postgres « terrain de jeu » peuplé
 de données réalistes — **défauts compris** —, et un TP exécutable par chapitre.
