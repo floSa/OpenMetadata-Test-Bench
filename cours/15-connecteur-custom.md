@@ -271,9 +271,9 @@ Chapitre 15 — Connecteur maison
 `PYTHONPATH` n'est pas posé, ou le dépôt n'est pas monté. Vérifiez avec
 `docker compose exec ingestion ls /omlab`.
 
-**« Le workflow dit 100 % mais rien n'apparaît. »**
-Le service n'existe pas. Voir le piège de la section 3 — et prenez l'habitude
-de lire ce qui s'affiche **après** le résumé.
+**« `Entity not found: database ...` alors que je n'ai rien changé à la base. »**
+C'est le service qui manque : créez-le dans `prepare()`, comme ci-dessus. Le message
+accuse la base parce que c'est la première entité que le sink tente d'écrire.
 
 **« Comment déboguer ? »**
 `loggerLevel: DEBUG` dans le YAML, et des `logger.info()` dans votre code.
