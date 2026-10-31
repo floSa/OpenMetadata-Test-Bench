@@ -53,7 +53,7 @@ Santé de l'instance :
   OK  jwks
   OK  migrations
   KO  Object Storage
-  OK  Search Reindex Status
+  KO  Search Reindex Status
 
 Préférences :
   lineage    : profondeur 2/2
@@ -68,15 +68,17 @@ Remise à            : 2
 Journal d'audit, 5 dernières entrées :
   userLogin          admin           user           admin
   userLogin          admin           user           admin
-  entityCreated      admin           kpi            description_80_pourcent
   userLogin          admin           user           admin
-  userLogin          admin           user           admin
+  userLogin          relectrice      user           relectrice
+  entityDeleted      admin           dataProduct    essai_formulaire
 
 Ressources pédagogiques intégrées : 26
 ```
 
 **`Object Storage` en KO est normal ici.** Le compose officiel n'active pas le stockage objet,
 et les documents du Context Center en ont besoin : leur contenu serait sinon perdu.
+`Search Reindex Status` passe en OK après la première réindexation du
+[chapitre 16](16-contracts-ops-projet-final.md), lancée à la fin de `./omlab demo`.
 
 Toutes ces préférences passent par une seule route, `/system/settings`, et un `config_type`.
 
@@ -94,7 +96,7 @@ L'**e-mail** conditionne plusieurs fonctions : invitations, réinitialisation de
 alertes par e-mail et **rapport Data Insights**. Sans SMTP, elles restent
 inopérantes. Ce laboratoire n'en a pas : ces envois n'ont pas été testés.
 
-**Le journal d'audit** remplace les hypothèses par des faits : qui a créé ce KPI, et quand. Le
+**Le journal d'audit** remplace les hypothèses par des faits : qui a supprimé ce produit de données, et quand. Le
 filtre par bot montre aussi ce que font vos automatismes, et **Export** l'archive.
 
 ## 3. Fixer un objectif
@@ -138,18 +140,17 @@ discussion, le script les fait viser notre récepteur, pour voir ce qui partirai
 Alertes créées : Slack, MsTeams, GChat
 Vers l'aval : profondeur 2, activé True
 
-4 messages reçus. Clés de premier niveau :
+3 messages reçus. Clés de premier niveau :
   ['blocks']
-  ['cardsV2']
   ['attachments', 'type']
-  ['changeDescription', 'currentVersion', 'entity', 'entityFullyQualifiedName', 'entityId', 'entityType']
+  ['cardsV2']
 
 Alertes de démonstration retirées.
 ```
 
 `blocks` est le format Slack, `cardsV2` celui de Google Chat, `attachments` celui de Teams. La
-quatrième charge est celle de l'alerte du chapitre 12. **Nous n'avons donc pas vérifié l'affichage
-dans ces outils**, seulement l'envoi. L'ordre d'arrivée varie.
+charge de l'alerte du chapitre 12 peut s'y ajouter, et l'ordre d'arrivée varie. **Nous n'avons
+pas vérifié l'affichage dans ces outils**, seulement l'envoi.
 
 `notifyDownstream` prévient en plus les propriétaires des assets **en aval**, en suivant le
 lineage jusqu'à `downstreamDepth`. Le script déclare cette alerte et relit son réglage, sans
@@ -232,7 +233,7 @@ Les chapitres 12 et 21 doivent avoir tourné.
 
 1. Dans le débogueur, testez `cmartin` puis `relectrice` sur la même opération.
 2. Dans *Settings → Preferences → Theme*, changez la couleur principale, puis cliquez sur **Reset**.
-3. Dans **Audit Logs**, retrouvez le KPI créé par le script.
+3. Dans **Audit Logs**, retrouvez le KPI créé par le script, en filtrant sur **Entity Type**.
 
 **Vérifier :**
 

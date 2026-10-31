@@ -21,7 +21,7 @@ Contrat du chapitre 16, exporté en ODCS :
   ---
   apiVersion: "v3.1.0"
   kind: "DataContract"
-  id: "241d9985-ab17-4acd-abbe-873929b4645c"
+  id: "afcf1552-7131-4dc2-a931-d9e707b13e94"
   name: "contrat_revenue_monthly"
   version: "0.2"
   status: "draft"
@@ -67,7 +67,7 @@ search_metadata(query='ventes') : 14 résultat(s)
   databaseSchema omlab_fichiers.exports.ventes
   tag          dbtTags.ventes
 
-get_entity_lineage : 2 arête(s), racine omlab_postgres.omlab.analytics.v_revenue_monthly
+get_entity_lineage : 4 arête(s), racine omlab_postgres.omlab.analytics.v_revenue_monthly
 ```
 
 ### Brancher un assistant

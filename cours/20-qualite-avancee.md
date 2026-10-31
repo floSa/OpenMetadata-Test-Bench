@@ -98,13 +98,13 @@ Le SDK permet de contrôler la qualité depuis un pipeline, sans YAML ni planifi
 
 ```
 --- TestRunner sur raw.customers ---
-  country_not_null                               Failed
   customers_email_bien_forme                     Success
   customers_email_unique                         Failed
   customers_pays_par_activite                    Failed
   customers_pays_renseigne                       Failed
   customers_volume_exact                         Success
   table_row_count_between                        Success
+  country_not_null                               Failed
 
 --- DataFrameValidator sur un lot à charger ---
   Chargement autorisé ? False

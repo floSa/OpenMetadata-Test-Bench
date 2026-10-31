@@ -17,7 +17,7 @@ Dès qu'un glossaire a des **relecteurs**, un terme ne devient plus `Approved` t
 
 ```
 Terme créé : Finance.MargeBrute, statut Draft
-Tâche      : TASK-00014 (RequestApproval), assignée à ['relectrice']
+Tâche      : TASK-00011 (RequestApproval), assignée à ['relectrice']
 Statut     : In Review
 Après relecture : Approved
 
