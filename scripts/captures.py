@@ -468,6 +468,133 @@ def chapitre_17(m: Manuel) -> None:
     m.enregistrer("17-mcp")
 
 
+def chapitre_18(m: Manuel) -> None:
+    m.ouvrir(f"{ORDERS}/custom_properties", hauteur=700)
+    m.noter(m.page.get_by_text("frequenceMaj").first, m.page.get_by_text("Tier1").first)
+    m.enregistrer("18-propriete")
+
+    m.ouvrir(f"{CUSTOMERS}/activity_feed/all", hauteur=900, attente=2500)
+    m.noter(m.page.get_by_text("Pourquoi 39 pays").first, m.page.get_by_text("Oui, ce fichier").first)
+    m.enregistrer("18-conversation")
+
+    m.ouvrir(f"{ORDERS}/versions/0.4", hauteur=900, attente=2500)
+    m.enregistrer("18-versions")
+
+    m.ouvrir("/users/admin/access-token", hauteur=700)
+    m.enregistrer("18-jeton")
+
+
+def chapitre_19(m: Manuel) -> None:
+    m.ouvrir("/bulk/import/glossary/Commerce", hauteur=800, attente=2500)
+    m.enregistrer("19-import-glossaire")
+
+    m.ouvrir("/bulk/import/table/omlab_postgres.omlab.raw.products", hauteur=800, attente=2500)
+    m.enregistrer("19-import-table")
+
+
+def chapitre_20(m: Manuel) -> None:
+    m.ouvrir(f"/test-case/{SERVICE}.raw.customers.country.customers_pays_par_activite", hauteur=1000, attente=3000)
+    m.page.get_by_role("tab", name="Dimensionality").click()
+    m.reposer(2500)
+    m.noter(m.page.get_by_role("tab", name="Dimensionality"))
+    m.enregistrer("20-test-dimension")
+
+    m.ouvrir(f"{ORDERS}/profiler/table-profile", hauteur=1000, attente=3000)
+    cible = m.page.get_by_text("commandes_annulees").first
+    cible.scroll_into_view_if_needed(timeout=10000)
+    m.reposer(1500)
+    m.noter(cible)
+    m.enregistrer("20-metrique-maison")
+
+    m.ouvrir("/incident-manager", hauteur=900, attente=2500)
+    m.enregistrer("20-incidents")
+
+    m.ouvrir(f"/test-case/{SERVICE}.raw.orders.rapprochement_compta", hauteur=900, attente=2500)
+    m.enregistrer("20-test-externe")
+
+
+def chapitre_21(m: Manuel) -> None:
+    m.ouvrir("/glossary/Finance.MargeBrute", hauteur=800)
+    m.noter(m.page.get_by_text("Approved").first, m.page.get_by_text("Workflow History").first, m.page.get_by_text("Reviewers").first)
+    m.enregistrer("21-terme-approuve")
+
+    m.ouvrir("/glossary/Logistique", hauteur=800)
+    m.enregistrer("21-skos")
+
+    m.ouvrir("/settings/governance/glossary-term-relations", hauteur=900)
+    m.enregistrer("21-relations")
+
+    m.ouvrir("/workflows", hauteur=800, attente=2500)
+    m.page.get_by_text("Glossary Approval Workflow", exact=True).first.click()
+    m.reposer(3500)
+    m.enregistrer("21-workflow")
+
+    m.ouvrir("/settings/preferences/dataAssetRules", hauteur=800, attente=2500)
+    m.enregistrer("21-regles")
+
+
+def chapitre_22(m: Manuel) -> None:
+    m.ouvrir("/settings/members/teams/Commerce", hauteur=700)
+    m.enregistrer("22-equipes")
+
+    m.ouvrir("/settings/persona/DataSteward", hauteur=700)
+    m.enregistrer("22-persona")
+
+    m.ouvrir("/settings/access/permission-debugger", hauteur=900, attente=2500)
+    champ = m.page.get_by_role("combobox").last
+    champ.click()
+    champ.fill("relectrice")
+    m.reposer(2500)
+    m.page.locator(".ant-select-dropdown:visible .ant-select-item-option").first.click()
+    m.reposer(3000)
+    m.enregistrer("22-permissions")
+
+    m.ouvrir("/settings/access/audit-logs", hauteur=900, attente=5000)
+    m.enregistrer("22-audit")
+
+    m.ouvrir("/settings/preferences/om-health", hauteur=1000, attente=4000)
+    m.noter(m.page.get_by_text("Object Storage").first)
+    m.enregistrer("22-sante")
+
+    m.ouvrir("/settings/preferences/search-settings", hauteur=900, attente=2500)
+    m.enregistrer("22-recherche")
+
+    m.ouvrir("/data-insights/kpi", hauteur=800, attente=2500)
+    m.enregistrer("22-kpi")
+
+
+def chapitre_23(m: Manuel) -> None:
+    m.ouvrir(f"/table/{SERVICE}.analytics.v_revenue_monthly/lineage", hauteur=1000, attente=3500)
+    m.recadrer_lineage()
+    m.enregistrer("23-lineage-complet")
+
+    m.ouvrir(f"/table/{SERVICE}.analytics_dbt.ventes_par_pays/dbt", hauteur=900, attente=2500)
+    m.enregistrer("23-dbt")
+
+    m.ouvrir('/topic/omlab_kafka."commandes.creees"/schema', hauteur=800, attente=2500)
+    m.enregistrer("23-topic")
+
+    m.ouvrir("/mlmodel/omlab_mlflow.prevision_ventes/details", hauteur=900, attente=2500)
+    m.enregistrer("23-modele")
+
+    m.ouvrir("/container/omlab_s3.omlab-lac.stocks/schema", hauteur=800, attente=2500)
+    m.enregistrer("23-conteneur")
+
+    m.ouvrir("/service/pipelineServices/omlab_airflow/pipelines", hauteur=800, attente=3000)
+    m.enregistrer("23-airflow")
+
+    m.ouvrir("/apiEndpoint/omlab_api.commandes.%2Fcommandes%2F%7Bid%7D%2Fget", hauteur=800, attente=4000)
+    m.enregistrer("23-api")
+
+
+def chapitre_24(m: Manuel) -> None:
+    m.ouvrir(f"/table/{SERVICE}.raw.products/contract", hauteur=1000, attente=3000)
+    m.enregistrer("24-contrat")
+
+    m.ouvrir("/context-center/memories", hauteur=800, attente=2500)
+    m.enregistrer("24-memoires")
+
+
 CHAPITRES: dict[str, Callable[[Manuel], None]] = {
     nom.removeprefix("chapitre_"): f for nom, f in list(globals().items()) if nom.startswith("chapitre_")
 }

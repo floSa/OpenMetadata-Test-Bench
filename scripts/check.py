@@ -9,12 +9,13 @@ pas ce que les logs ont bien voulu afficher. Un chapitre non encore fait
 apparaît en échec — c'est normal, c'est votre liste de courses.
 """
 
+import base64
 import sys
 import urllib.parse
 
 sys.path.insert(0, "/omlab")
 
-from lib.om import Check, api, fqn
+from lib.om import Check, api, fqn, jeton_admin
 
 SERVICE = "omlab_postgres"
 
@@ -243,6 +244,138 @@ def check_17(c: Check) -> None:
     c.expect(get("/apps/name/McpApplication") is not None, "le serveur MCP est installé")
 
 
+def check_18(c: Check) -> None:
+    """Collaborer sur une fiche."""
+    admin = jeton_admin()
+    proprietes = api("/metadata/types/name/table?fields=customProperties")["customProperties"]
+    c.expect(any(p["name"] == "frequenceMaj" for p in proprietes), "la propriété frequenceMaj est déclarée sur le type table")
+
+    orders = api(f"/tables/name/{fqn('raw', 'orders')}?fields=extension,tags")
+    c.expect((orders.get("extension") or {}).get("frequenceMaj") == "quotidienne", "raw.orders porte la valeur de sa propriété")
+    c.expect(any(t["tagFQN"] == "Tier.Tier1" for t in orders["tags"]), "raw.orders est en Tier1")
+
+    taches = {t["name"]: t for t in api("/tasks?limit=200", token=admin)["data"]}
+    demande = taches.get("decrire_customers_country", {})
+    c.expect(demande.get("status") == "Approved", "la demande de description a été approuvée")
+    colonnes = api(f"/tables/name/{fqn('raw', 'customers')}")["columns"]
+    pays = next(x for x in colonnes if x["name"] == "country")
+    c.expect("ISO" in (pays.get("description") or ""), "la réponse a écrit la description de la colonne")
+    c.expect(get(f"/tables/name/{fqn('raw', 'table_ephemere')}?include=all") is None, "la table éphémère a bien été effacée")
+
+
+def check_19(c: Check) -> None:
+    """Import et export en masse."""
+    panier = get("/glossaryTerms/name/Commerce.Panier")
+    c.expect(panier is not None, "le terme Panier vient de l'import CSV")
+    c.expect("Cart" in ((panier or {}).get("synonyms") or []), "ses synonymes ont été importés")
+    colonnes = api(f"/tables/name/{fqn('raw', 'products')}")["columns"]
+    nom = next(x for x in colonnes if x["name"] == "name")
+    c.expect("Nom commercial" in (nom.get("description") or ""), "la description de raw.products.name vient de l'import CSV")
+
+
+def check_20(c: Check) -> None:
+    """La qualité avancée."""
+    orders, customers = fqn("raw", "orders"), fqn("raw", "customers")
+    externe = get(f"/dataQuality/testCases/name/{orders}.rapprochement_compta?fields=testCaseResult") or {}
+    c.expect((externe.get("testCaseResult") or {}).get("testCaseStatus") == "Success", "le test externe a son verdict")
+
+    periode = "startTs=0&endTs=99999999999999"
+    table = api(f"/tables/{orders}/tableProfile?{periode}")["data"]
+    metriques = {m["name"]: m["value"] for m in (table[0].get("customMetrics") or [])} if table else {}
+    c.expect("commandes_annulees" in metriques, f"la métrique de table a une valeur ({metriques.get('commandes_annulees')})")
+    colonne = api(f"/tables/{orders}.amount/columnProfile?{periode}")["data"]
+    metriques = {m["name"]: m["value"] for m in (colonne[0].get("customMetrics") or [])} if colonne else {}
+    c.expect("montant_des_avoirs" in metriques, f"la métrique de colonne a une valeur ({metriques.get('montant_des_avoirs')})")
+
+    cas = f"{customers}.country.customers_pays_par_activite"
+    segments = get(f"/dataQuality/testCases/dimensionResults/{cas}?dimensionName=is_active&{periode}") or {}
+    valeurs = {s["dimensionValues"][0]["value"] for s in segments.get("data") or []}
+    c.expect(len(valeurs) == 2, f"le test par segment connaît {len(valeurs)} valeurs de is_active")
+    c.expect(get(f"/dataQuality/testCases/name/{customers}.table_row_count_between") is not None,
+             "TestRunner a enregistré ses tests dans le catalogue")
+
+    cas = f"{customers}.country.customers_pays_renseigne"
+    etapes = api(f"/dataQuality/testCases/testCaseIncidentStatus?testCaseFQN={cas}&{periode}&latest=false&limit=50")["data"]
+    c.expect(any(e["testCaseResolutionStatusType"] == "Resolved" for e in etapes), "un incident est allé jusqu'à Resolved")
+
+
+def check_21(c: Check) -> None:
+    """La gouvernance avancée."""
+    admin = jeton_admin()
+    terme = get("/glossaryTerms/name/Finance.MargeBrute") or {}
+    c.expect(terme.get("entityStatus") == "Approved", "le terme MargeBrute a été approuvé par la relectrice")
+
+    commande = api("/glossaryTerms/name/Commerce.Commande?fields=relatedTerms")
+    c.expect(any(r["term"]["name"] == "Avoir" for r in commande["relatedTerms"]), "Commande est reliée à Avoir")
+    c.expect(get("/glossaryTerms/name/Logistique.Transport.Livraison") is not None, "l'import SKOS a créé la hiérarchie Transport > Livraison")
+    c.expect(get("/domains/name/Ventes.VentesEurope") is not None, "le sous-domaine VentesEurope existe")
+
+    formulaires = api("/governance/intakeForms?limit=10", token=admin)["data"]
+    c.expect(not formulaires, "aucun formulaire de démonstration ne reste actif")
+
+    session = api("/users/login", method="POST", token="sans-objet", body={
+        "email": "relectrice@omlab.example",
+        "password": base64.b64encode(b"Relecture-2026!tuto").decode(),
+    })["accessToken"]
+    table = api(f"/tables/name/{fqn('raw', 'customers')}")
+    colonnes = api(f"/tables/{table['id']}/sampleData", token=session)["sampleData"]["columns"]
+    c.expect(any("[MASKED]" in x for x in colonnes), "les données sensibles sont masquées pour la relectrice")
+
+
+def check_22(c: Check) -> None:
+    """L'administration."""
+    admin = jeton_admin()
+    crm = get("/teams/name/Crm?fields=parents") or {}
+    c.expect([p["name"] for p in crm.get("parents") or []] == ["Marketing"], "la hiérarchie va jusqu'à l'équipe Crm")
+    persona = get("/personas/name/DataSteward?fields=users") or {}
+    c.expect(bool(persona.get("users")), "le persona DataSteward a un utilisateur")
+    c.expect(bool(api("/audit/logs?limit=1", token=admin)["data"]), "le journal d'audit contient des entrées")
+    c.expect(get("/kpi/name/description_80_pourcent") is not None, "le KPI description_80_pourcent existe")
+    alertes = {a["name"] for a in api("/events/subscriptions?limit=100", token=admin)["data"]}
+    c.expect(not alertes & {"omlab_slack", "omlab_teams", "omlab_gchat", "omlab_aval"}, "les alertes de démonstration ont été retirées")
+
+
+def check_23(c: Check) -> None:
+    """Au-delà de Postgres."""
+    topic = get("/topics/name/" + urllib.parse.quote('omlab_kafka."commandes.creees"')) or {}
+    c.expect((topic.get("messageSchema") or {}).get("schemaType") == "Avro", "le topic commandes.creees a son schéma Avro")
+    conteneur = get("/containers/name/omlab_s3.omlab-lac.stocks?fields=dataModel") or {}
+    nb = len((conteneur.get("dataModel") or {}).get("columns") or [])
+    c.expect(nb == 2, f"le conteneur stocks a {nb} colonnes")
+    modele = get("/mlmodels/name/omlab_mlflow.prevision_ventes") or {}
+    c.expect(any(h["name"] == "fenetre_mois" for h in modele.get("mlHyperParameters") or []), "le modèle prevision_ventes a son hyperparamètre")
+    tableaux = api("/dashboards?service=omlab_metabase&limit=50")["data"] if get("/services/dashboardServices/name/omlab_metabase") else []
+    c.expect(any(d.get("displayName") == "Ventes" for d in tableaux), "le tableau de bord Ventes est catalogué")
+    dags = api("/pipelines?service=omlab_airflow&limit=1")["paging"]["total"] if get("/services/pipelineServices/name/omlab_airflow") else 0
+    c.expect(dags > 0, "les DAG d'Airflow sont catalogués")
+    index = api("/searchIndexes?service=omlab_elastic&limit=1")["paging"]["total"] if get("/services/searchServices/name/omlab_elastic") else 0
+    c.expect(index > 0, "Elasticsearch a des index catalogués")
+    routes = api("/apiEndpoints?service=omlab_api&limit=5")["data"] if get("/services/apiServices/name/omlab_api") else []
+    c.expect(bool(routes), "la route de l'API est cataloguée")
+
+    modele_dbt = fqn("analytics_dbt", "ventes_par_pays")
+    table = get(f"/tables/name/{modele_dbt}?fields=dataModel") or {}
+    amont = get(f"/lineage/table/name/{modele_dbt}?upstreamDepth=1&downstreamDepth=0") or {}
+    noms = {n["name"] for n in amont.get("nodes") or []}
+    c.expect("dbt" in (table.get("description") or "") and {"orders", "customers"} <= noms, "le modèle dbt a son lineage et sa description")
+    test = get(f"/dataQuality/testCases/name/{modele_dbt}.nb_commandes.not_null_ventes_par_pays_nb_commandes?fields=testCaseResult") or {}
+    c.expect((test.get("testCaseResult") or {}).get("testCaseStatus") == "Success", "le test dbt a un résultat")
+    amont = api(f"/lineage/table/name/{fqn('analytics', 'fct_orders')}?upstreamDepth=1&downstreamDepth=0")
+    c.expect("products" in {n["name"] for n in amont["nodes"]}, "OpenLineage a ajouté products en amont de fct_orders")
+
+
+def check_24(c: Check) -> None:
+    """Standards ouverts et agents."""
+    admin = jeton_admin()
+    contrats = api("/dataContracts?limit=50&fields=entity", token=admin)["data"]
+    contrat = next((x for x in contrats if x["name"] == "contrat_products"), {})
+    c.expect((contrat.get("entity") or {}).get("name") == "products", "le contrat ODCS est rattaché à raw.products")
+    nb = len(contrat.get("schema") or [])
+    c.expect(nb == 2, f"il promet {nb} colonnes")
+    memoires = api("/contextCenter/memories?limit=20", token=admin)["data"]
+    c.expect(any(m["name"] == "ca_hors_avoirs" for m in memoires), "la mémoire ca_hors_avoirs existe")
+
+
 CHECKS = {
     "04": ("Ingestion des métadonnées", check_04),
     "05": ("Profiling", check_05),
@@ -257,6 +390,13 @@ CHECKS = {
     "15": ("Connecteur maison", check_15),
     "16": ("Contrat de données", check_16),
     "17": ("Le tour complet de la 2.x", check_17),
+    "18": ("Collaborer sur une fiche", check_18),
+    "19": ("Import et export en masse", check_19),
+    "20": ("La qualité avancée", check_20),
+    "21": ("La gouvernance avancée", check_21),
+    "22": ("L'administration", check_22),
+    "23": ("Au-delà de Postgres", check_23),
+    "24": ("Standards ouverts et agents", check_24),
 }
 
 

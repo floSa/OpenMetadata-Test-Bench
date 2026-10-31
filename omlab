@@ -201,6 +201,45 @@ cmd_demo() {
   cmd_py tp/17-tour-2x/02_annonce_tache.py
   cmd_py tp/17-tour-2x/03_article.py
   cmd_py tp/17-tour-2x/04_client_mcp.py
+  cmd_py tp/18-collaboration/01_fiche_enrichie.py
+  cmd_py tp/18-collaboration/02_conversation_demandes.py
+  cmd_py tp/18-collaboration/03_cycle_de_vie.py
+  cmd_py tp/18-collaboration/04_jeton_personnel.py
+  cmd_py tp/19-import-export/01_glossaire_csv.py
+  cmd_py tp/19-import-export/02_colonnes_csv.py
+  cmd_py tp/19-import-export/03_autres_exports.py
+  cmd_py tp/20-qualite-avancee/01_test_externe.py
+  cmd_py tp/20-qualite-avancee/02_metrique_profil.py
+  cmd_profile tp/20-qualite-avancee/profiler-orders.yaml
+  cmd_py tp/20-qualite-avancee/03_test_dimension.py
+  cmd_test tp/20-qualite-avancee/tests-dimension.yaml
+  cmd_py tp/20-qualite-avancee/03_test_dimension.py
+  cmd_py tp/20-qualite-avancee/04_qualite_en_code.py
+  cmd_py tp/20-qualite-avancee/05_incident.py
+  cmd_py tp/21-gouvernance-avancee/01_approbation.py
+  cmd_py tp/21-gouvernance-avancee/02_ontologie.py
+  cmd_py tp/21-gouvernance-avancee/03_regles.py
+  cmd_py tp/21-gouvernance-avancee/04_workflows.py
+  cmd_py tp/22-administration/01_organisation.py
+  cmd_py tp/22-administration/02_preferences.py
+  cmd_py tp/22-administration/03_kpi.py
+  cmd_py tp/22-administration/04_destinations.py
+  cmd_sources up
+  cmd_py tp/23-sources/01_alimenter_sources.py
+  cmd_ingest tp/23-sources/kafka.yaml
+  cmd_ingest tp/23-sources/s3.yaml
+  cmd_ingest tp/23-sources/mlflow.yaml
+  cmd_ingest tp/23-sources/metabase.yaml
+  cmd_ingest tp/23-sources/airflow.yaml
+  cmd_ingest tp/23-sources/elasticsearch.yaml
+  cmd_ingest tp/23-sources/api.yaml
+  cmd_sources dbt
+  cmd_ingest tp/04-ingestion/metadata.yaml
+  cmd_ingest tp/23-sources/dbt.yaml
+  cmd_py tp/23-sources/02_lineage_ouvert.py
+  cmd_py tp/24-standards-agents/01_odcs.py
+  cmd_py tp/24-standards-agents/03_memoire.py
+  uv run -q --script tp/24-standards-agents/02_client_mcp_officiel.py
   c_head "Réindexation : sans elle, la recherche ignore l'usage et les étiquettes"
   trigger_app SearchIndexingApplication
   sleep 60  # Data Insights lit l'index : il doit être reconstruit avant
@@ -277,7 +316,7 @@ omlab — laboratoire OpenMetadata
     ./omlab classify <fichier.yaml>   échantillonnage + détection de PII
     ./omlab app      <fichier.yaml>   application interne (réindexation...)
     ./omlab py       <script.py>      exécute un script du SDK
-    ./omlab demo               rejoue tous les TP, du chapitre 04 au 17
+    ./omlab demo               rejoue tous les TP, du chapitre 04 au 24
 
   Autres sources (chapitre 23)
     ./omlab sources up         démarre Kafka, S3, MLflow, Metabase
