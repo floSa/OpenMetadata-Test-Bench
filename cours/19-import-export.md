@@ -107,8 +107,9 @@ References** décrit chaque colonne du CSV.
 ![L'import CSV d'une table](img/19-import-table.png)
 
 **L'arborescence.** Pour repérer ce qu'on va exporter, le panneau de gauche d'**Explore**
-déroule la hiérarchie service, base, schéma, table. Elle est visible au
-[chapitre 03](03-catalogue-decouverte.md).
+déroule la hiérarchie **(1)** service, base, schéma, table.
+
+![La hiérarchie dans Explore](img/19-arborescence.png)
 
 ---
 

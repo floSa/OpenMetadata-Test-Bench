@@ -1,7 +1,7 @@
 # Chapitre 17 — Le tour complet de la 2.x
 
 > **Objectifs** — Avoir une vue d'ensemble de toutes les fonctions d'OpenMetadata 2.0,
-> savoir lesquelles ce cours a déjà couvertes, et essayer celles qu'apporte la 2.x :
+> savoir où ce cours traite chacune, et essayer celles qu'apporte la 2.x :
 > marketplace, annonces et tâches, Context Center, serveur MCP.
 > **Durée** — 50 minutes.
 
@@ -14,15 +14,20 @@ La colonne **Essai** dit ce qui a été fait pour de vrai sur le laboratoire en 
 - **TP** : un script ou un workflow du dépôt l'exécute ;
 - **écran** : la page a été ouverte et capturée, sans scénario complet ;
 - **non essayé** : la fonction existe d'après la documentation, ce laboratoire ne l'a
-  pas fait tourner.
+  pas fait tourner. Le chapitre cité l'explique.
+
+Cette carte résume. Le détail page par page se mesure avec `./omlab couverture`.
 
 ### Découvrir
 
 | Fonction | Essai | Chapitre |
 |---|---|---|
 | Recherche, facettes, syntaxe Lucene | TP | 03 |
-| Fiche d'asset, versions, abonnement, votes | écran | 03 |
+| Fiche d'asset, versions, abonnement, votes | TP | 18 |
 | Panneau **Asset Health**, certification, rétention | écran | 03 |
+| Propriétés personnalisées, tier, suppression et restauration | TP | 18 |
+| Conversations, demandes de description et de tag, jetons personnels | TP | 18 |
+| Import et export en CSV | TP | 19 |
 | Popularité et percentiles d'usage | TP | 06 |
 | Lineage de service (menu **Lineage**) | écran | 17 |
 
@@ -35,37 +40,48 @@ La colonne **Essai** dit ce qui a été fait pour de vrai sur le laboratoire en 
 | Usage et lineage déduits du SQL | TP | 06 |
 | Connecteur maison | TP | 15 |
 | AutoPilot : ingestion automatique d'un nouveau service | écran | 16 |
-| dbt et les connecteurs hors Postgres | non essayé | — |
-| Orchestrateur Kubernetes, qui remplacera l'Airflow interne | non essayé | — |
+| dbt, Kafka, S3, MLflow, Metabase, Airflow, Elasticsearch, API | TP | 23 |
+| OpenLineage | TP | 23 |
+| Lineage entre bases | non essayé | 23 |
+| Catalogues tiers, espaces de fichiers | non essayé | 23 |
+| Orchestrateur Kubernetes, qui remplacera l'Airflow interne | non essayé | 22 |
 
 ### Gouverner
 
 | Fonction | Essai | Chapitre |
 |---|---|---|
 | Glossaire, synonymes, rattachement | TP | 07 |
+| Approbation des termes, relations entre termes | TP | 21 |
+| Masquage des données sensibles | TP | 21 |
 | Classifications, détection de PII | TP | 08 |
 | Équipes, rôles, politiques, bots | TP | 09 |
 | Domaines et produits de données, **Data Marketplace** | TP | 17 |
 | Métriques | TP | 17 |
 | **Ontology Explorer** | écran | 17 |
-| **Workflows** de gouvernance | écran | 17 |
-| **Intake Forms** : champs imposés à la création | écran | 17 |
+| **Workflows** de gouvernance | TP | 21 |
+| **Intake Forms** : champs imposés à la création | TP | 21 |
+| **Data Asset Rules** : règles d'instance | TP | 21 |
 | **Column Bulk Operations** (bêta) | écran | 17 |
-| Import OWL d'une ontologie | non essayé | — |
-| Export RDF et requêtes SPARQL : `rdfEnabled` vaut `false` ici | non essayé | — |
-| SSO, SCIM | non essayé | — |
+| Import OWL ou SKOS d'une ontologie | TP | 21 |
+| Export RDF et requêtes SPARQL : `rdfEnabled` vaut `false` ici | non essayé | 22 |
+| SSO, SCIM | non essayé | 22 |
 
 ### Fiabiliser
 
 | Fonction | Essai | Chapitre |
 |---|---|---|
 | Tests, suites, résultats | TP | 10 |
-| Incidents | TP | 10 |
+| Incidents et leur cycle de vie | TP | 20 |
+| Tests externes, tests par dimension, qualité dans le code | TP | 20 |
+| Métriques maison du profiler | TP | 20 |
 | **Test Library** : les définitions de tests | écran | 17 |
 | Lineage manuel, impact | TP | 11 |
 | Alertes et webhooks | TP | 12 |
+| Slack, Teams, Google Chat : envoi vers un récepteur local | TP | 22 |
 | Contrats de données | TP | 16 |
-| **Data Insights**, KPI | écran | 17 |
+| Contrats au format ODCS | TP | 24 |
+| **Data Insights** | écran | 17 |
+| KPI | TP | 22 |
 
 ### Collaborer et automatiser
 
@@ -76,10 +92,13 @@ La colonne **Essai** dit ce qui a été fait pour de vrai sur le laboratoire en 
 | Applications internes | TP | 16 |
 | Annonces et tâches, avec leurs nouvelles routes | TP | 17 |
 | **Context Center** : articles | TP | 17 |
-| Context Center : documents et mémoires | écran | 17 |
-| Serveur **MCP** | TP | 17 |
-| Recherche sémantique : demande `LLM_ENABLED` et un fournisseur d'embeddings | non essayé | — |
-| Personas, personnalisation des pages | non essayé | — |
+| Context Center : mémoires | TP | 24 |
+| Context Center : documents, faute de stockage objet | non essayé | 24 |
+| Serveur **MCP**, client du SDK officiel | TP | 24 |
+| Assistants MCP (Claude, Cursor, VS Code...), OAuth | non essayé | 24 |
+| Recherche sémantique : demande `LLM_ENABLED` et un fournisseur d'embeddings | non essayé | 24 |
+| Personas, débogueur de permissions, journal d'audit, préférences | TP | 22 |
+| Personnalisation des pages d'un persona | écran | 22 |
 
 ### Ce qui revient à Collate
 
@@ -223,7 +242,8 @@ La réponse contient un `nextCursor`, nouveauté de la 2.0 : à passer en `curso
 suivant pour paginer sans sauter de résultats. `from` et `size` restent acceptés.
 
 Pour brancher un vrai client MCP, donnez-lui l'URL `http://localhost:8585/mcp` et l'en-tête
-`Authorization: Bearer <jeton>`. Ce laboratoire n'a testé que le client du script.
+`Authorization: Bearer <jeton>`. Le [chapitre 24](24-standards-agents.md) le fait avec le SDK
+officiel.
 
 ## Mode d'emploi : les écrans de la 2.x
 
@@ -259,7 +279,7 @@ section **Data Assets (1)**, à droite, relie l'article à la table.
 ![Un article du Context Center](img/17-article.png)
 
 **L'ontologie.** *Govern → Ontology Explorer* dessine les termes de glossaire et leurs
-relations. Les quatre termes du TP sont isolés : aucune relation n'a été déclarée entre eux.
+relations. Seuls `Commande` et `Avoir` sont reliés, depuis le [chapitre 21](21-gouvernance-avancee.md).
 
 ![L'Ontology Explorer](img/17-ontologie.png)
 
@@ -374,4 +394,4 @@ presque vides.
 ---
 
 **Précédent :** [16 — Contrats, exploitation, projet final](16-contracts-ops-projet-final.md) ·
-**Retour au [sommaire](../README.md)**
+**Suivant :** [18 — Collaborer sur une fiche](18-collaboration.md)

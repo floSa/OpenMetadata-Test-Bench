@@ -1,6 +1,6 @@
 # OpenMetadata — tutoriel complet et exécutable
 
-**Un cours en 17 chapitres pour apprendre tout ce que propose OpenMetadata, avec un laboratoire Docker complet pour tout essayer immédiatement.**
+**Un cours en 24 chapitres pour apprendre tout ce que propose OpenMetadata, avec un laboratoire Docker complet pour tout essayer immédiatement.**
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
@@ -36,6 +36,7 @@ captures de l'interface, avec des repères numérotés que le texte explique.
 ## Architecture
 
 Le laboratoire empile deux fichiers compose Docker sur le même réseau `app_net`.
+Un troisième, `docker-compose.sources.yml`, ajoute à la demande les sources du [chapitre 23](cours/23-sources.md).
 
 | Service | Image | Rôle |
 |---|---|---|
@@ -167,12 +168,12 @@ passe chaque bloc Mermaid dans l'analyseur officiel.
 |---|---|
 | [`omlab`](omlab) | CLI bash : point d'entrée de toutes les commandes |
 | [`.env.example`](.env.example) | modèle de configuration locale |
-| [`cours/`](cours/) | les 17 chapitres |
+| [`cours/`](cours/) | les 24 chapitres |
 | [`cours/img/`](cours/img/) | les captures d'écran du mode d'emploi, générées par `./omlab captures` |
 | [`tp/`](tp/) | un dossier par chapitre : YAML d'ingestion, scripts Python |
 | [`lib/`](lib/) | `om.py` (client partagé), `csv_connector.py` (chapitre 15) |
-| [`scripts/`](scripts/) | `get_token.py`, `check.py`, `webhook_server.py`, `render_yaml.py`, `captures.py`, `check_docs.py` |
-| [`docker/`](docker/) | les deux fichiers compose et le seed SQL du playground |
+| [`scripts/`](scripts/) | `get_token.py`, `check.py`, `couverture.py`, `webhook_server.py`, `render_yaml.py`, `captures.py`, `check_docs.py` |
+| [`docker/`](docker/) | les fichiers compose (OpenMetadata, playground, autres sources) et le seed SQL |
 
 ## Licences & composants
 
@@ -235,12 +236,27 @@ passe chaque bloc Mermaid dans l'analyseur officiel.
 |---|---|---|
 | 17 | [Le tour complet de la 2.x](cours/17-tour-complet-2x.md) | situer chaque fonction, publier un produit de données, interroger le serveur MCP |
 
+### Module 6 — Approfondir
+
+| | Chapitre | Ce que vous saurez faire |
+|---|---|---|
+| 18 | [Collaborer sur une fiche](cours/18-collaboration.md) | propriétés, tier, demandes, restauration, jeton personnel |
+| 19 | [Import et export en masse](cours/19-import-export.md) | éditer le catalogue dans un tableur, sans mauvaise surprise |
+| 20 | [La qualité avancée](cours/20-qualite-avancee.md) | test externe, métrique maison, segments, qualité dans le code, incident |
+| 21 | [La gouvernance avancée](cours/21-gouvernance-avancee.md) | approbation, ontologie, règles, masquage, workflows |
+| 22 | [L'administration](cours/22-administration.md) | équipes, personas, permissions, préférences, audit, KPI, Slack et Teams |
+| 23 | [Au-delà de Postgres](cours/23-sources.md) | Kafka, S3, MLflow, Metabase, Airflow, Elasticsearch, API, dbt, OpenLineage |
+| 24 | [Standards ouverts et agents](cours/24-standards-agents.md) | contrats ODCS, vrai client MCP, mémoires |
+
+**Couverture mesurée** avec `./omlab couverture`, sur les 184 pages *how-to* de la documentation
+2.0, les familles de connecteurs et les sujets de déploiement : COUVERTURE
+
 **Parcours conseillés**
 
 - *Découverte rapide* (2 h) : 01 → 02 → 03 → 04 → 06
 - *Data engineer* (une journée) : tout sauf 09, en insistant sur 13, 14, 15
 - *Gouvernance / data steward* : 01 → 03 → 07 → 08 → 09 → 10 → 16
-- *Complet* : dans l'ordre, environ 12 heures avec les exercices
+- *Complet* : dans l'ordre, environ 18 heures avec les exercices
 
 ## Commandes utiles
 
@@ -265,12 +281,18 @@ OpenMetadata
   ./omlab usage    <f.yaml>  workflow d'usage
   ./omlab classify <f.yaml>  échantillonnage + détection de PII
   ./omlab py       <f.py>    exécute un script du SDK
-  ./omlab demo               rejoue tous les TP, du chapitre 04 au 17
+  ./omlab demo               rejoue tous les TP, du chapitre 04 au 24
+
+Autres sources (chapitre 23)
+  ./omlab sources up         démarre Kafka, S3, MLflow, Metabase
+  ./omlab sources dbt        exécute le projet dbt du TP
+  ./omlab sources down       arrête ces conteneurs
 
 Vérifications
   ./omlab check              toutes les vérifications de chapitre
   ./omlab check 04           seulement le chapitre 04
   ./omlab check-docs         contrôle la doc : schémas, liens, Mermaid (hôte, uv)
+  ./omlab couverture         mesure la couverture de la documentation officielle
 
 Mode d'emploi
   ./omlab captures           refait les captures de cours/img (hôte, uv)
@@ -324,6 +346,14 @@ demi-heure quand on le découvre seul.
 | 18 | Un connecteur maison doit créer son service lui-même, sinon zéro écriture et une erreur qui accuse la base | 15 |
 | 19 | Le champ `assets` d'un produit de données est ignoré sans erreur : il faut passer par `/assets/add` | 17 |
 | 20 | `ingestion-bot` n'a pas le droit `CreateTask` : `POST /tasks` répond 403 | 17 |
+| 21 | Un import CSV en `partialSuccess` a écrit les bonnes lignes et ignoré les autres | 19 |
+| 22 | `dimensionColumns` est refusé dans le YAML : un test par segment se déclare par l'API | 20 |
+| 23 | `TestRunner` enregistre ses tests dans le catalogue, et lance aussi ceux qui existent | 20 |
+| 24 | `DataFrameValidator` s'arrête au premier échec : un lot refusé cache d'autres défauts | 20 |
+| 25 | Un auteur relecteur est approuvé d'office, sans tâche, et tout `PUT` annule la tâche en cours | 21 |
+| 26 | Une étiquette `PII.Sensitive` masque l'échantillon pour tous, faux positifs compris | 21 |
+| 27 | Un serveur MLflow 2.x répond une liste vide au connecteur, sans erreur | 23 |
+| 28 | `dbt docs generate` après `dbt test` efface le résultat des tests | 23 |
 
 ## Versions
 

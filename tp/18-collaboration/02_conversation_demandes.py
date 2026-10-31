@@ -21,7 +21,7 @@ fils = api(f"/feed?entityLink={urllib.parse.quote(LIEN)}&type=Conversation")["da
 fil = next((f for f in fils if f["message"] == QUESTION), None)
 if fil is None:
     fil = api("/feed", method="POST", token=admin, body={
-        "message": QUESTION, "about": LIEN, "type": "Conversation", "from": "admin",
+        "message": QUESTION, "about": LIEN, "type": "Conversation",
     })
 if not fil.get("postsCount"):
     api(f"/feed/{fil['id']}/posts", method="POST", token=admin, body={

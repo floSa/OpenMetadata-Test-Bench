@@ -76,7 +76,7 @@ cmd_wait() {
 
 cmd_down() {
   c_head "Arrêt des conteneurs (les données sont conservées)"
-  dc down
+  dc_src down
 }
 
 cmd_nuke() {
@@ -84,7 +84,7 @@ cmd_nuke() {
   c_warn "Tout ce que vous avez fait dans OpenMetadata sera perdu."
   read -r -p "Confirmer ? [oui/non] " answer
   [ "$answer" = "oui" ] || { echo "Annulé."; exit 0; }
-  dc down -v
+  dc_src down -v
   # La base interne d'OpenMetadata est un dossier monté, pas un volume : `down -v`
   # ne la touche pas. Elle appartient à root, d'où le passage par un conteneur.
   docker run --rm -v "$ROOT/docker:/d" alpine rm -rf /d/docker-volume
@@ -265,6 +265,10 @@ cmd_captures() {
   uv run -q --script scripts/captures.py "$@"
 }
 
+cmd_couverture() {
+  python3 scripts/couverture.py
+}
+
 cmd_check_docs() {
   need_browser
   uv run -q --script scripts/check_docs.py "$@"
@@ -327,6 +331,7 @@ omlab — laboratoire OpenMetadata
     ./omlab check              lance toutes les vérifications de chapitre
     ./omlab check 04           lance celle du chapitre 04
     ./omlab check-docs         contrôle la doc : schémas, liens, Mermaid (hôte, uv)
+    ./omlab couverture         mesure la couverture de la documentation officielle
 
   Mode d'emploi
     ./omlab captures [07 10]   refait les captures d'écran de cours/img (hôte, uv)
@@ -337,7 +342,7 @@ EOF
 main() {
   local cmd="${1:-help}"; shift || true
   case "$cmd" in
-    up|wait|down|nuke|status|logs|psql|traffic|token|ingest|profile|test|usage|classify|app|py|demo|check|captures|sources|help)
+    up|wait|down|nuke|status|logs|psql|traffic|token|ingest|profile|test|usage|classify|app|py|demo|check|captures|sources|couverture|help)
       "cmd_$cmd" "$@" ;;
     check-docs) cmd_check_docs "$@" ;;
     *) c_err "Commande inconnue : $cmd"; echo; cmd_help; exit 1 ;;

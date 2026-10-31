@@ -9,6 +9,7 @@ Rien de spécifique à OpenMetadata ici : ce sont les gestes habituels d'une éq
 import io
 import json
 import time
+import urllib.error
 import urllib.request
 
 import boto3
@@ -17,20 +18,30 @@ from confluent_kafka.admin import AdminClient, NewTopic
 
 
 def appel(url: str, corps: dict | None = None, entetes: dict | None = None) -> dict:
+    """Appelle une source, en patientant : Metabase met une à deux minutes à démarrer."""
     requete = urllib.request.Request(
         url, data=json.dumps(corps).encode() if corps is not None else None,
         headers={"Content-Type": "application/json", **(entetes or {})},
     )
-    with urllib.request.urlopen(requete, timeout=60) as reponse:
-        contenu = reponse.read()
-    return json.loads(contenu) if contenu else {}
+    for _ in range(60):
+        try:
+            with urllib.request.urlopen(requete, timeout=60) as reponse:
+                contenu = reponse.read()
+            return json.loads(contenu) if contenu else {}
+        except urllib.error.HTTPError as err:
+            if err.code != 503:  # 503 : Metabase répond avant d'être prêt
+                raise
+        except (urllib.error.URLError, TimeoutError, ConnectionError):
+            pass  # pas encore démarré, ou connecté mais muet
+        time.sleep(5)
+    raise SystemExit(f"{url} ne répond toujours pas.")
 
 
 # --- Kafka : deux topics, dont un avec son schéma Avro ------------------------------
 admin = AdminClient({"bootstrap.servers": "omlab-redpanda:9092"})
 for futur in admin.create_topics([NewTopic(t, 3, 1) for t in ("commandes.creees", "paiements.recus")]).values():
     try:
-        futur.result(15)
+        futur.result(120)
     except Exception as err:
         if "TOPIC_ALREADY_EXISTS" not in str(err):
             raise
@@ -69,12 +80,7 @@ print("MLflow   : 1 modèle enregistré")
 # --- Metabase : l'assistant d'installation, une base, une question, un tableau de bord -
 MB = "http://omlab-metabase:3000/api"
 UTILISATEUR, MOT_DE_PASSE = "admin@omlab.example", "Metabase-2026!tuto"
-for _ in range(40):  # Metabase met une à deux minutes à démarrer
-    try:
-        proprietes = appel(f"{MB}/session/properties")
-        break
-    except OSError:
-        time.sleep(5)
+proprietes = appel(f"{MB}/session/properties")
 if not proprietes.get("has-user-setup"):
     appel(f"{MB}/setup", {
         "token": proprietes["setup-token"],

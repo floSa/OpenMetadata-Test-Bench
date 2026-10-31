@@ -491,6 +491,10 @@ def chapitre_19(m: Manuel) -> None:
     m.ouvrir("/bulk/import/table/omlab_postgres.omlab.raw.products", hauteur=800, attente=2500)
     m.enregistrer("19-import-table")
 
+    m.ouvrir("/explore/tables", hauteur=800, attente=3000)
+    m.noter(m.page.get_by_text("Databases", exact=True).first)
+    m.enregistrer("19-arborescence")
+
 
 def chapitre_20(m: Manuel) -> None:
     m.ouvrir(f"/test-case/{SERVICE}.raw.customers.country.customers_pays_par_activite", hauteur=1000, attente=3000)
