@@ -15,8 +15,6 @@ dans les chapitres sont celles que vous obtiendrez.
 Chaque chapitre pratique contient aussi un **mode d'emploi illustré** : de vraies
 captures de l'interface, avec des repères numérotés que le texte explique.
 
-![La fiche d'une table, annotée, dans le chapitre 03](cours/img/03-fiche.png)
-
 ## Sommaire
 
 - [Architecture](#architecture)
@@ -367,7 +365,7 @@ demi-heure quand on le découvre seul.
 | 24 | `DataFrameValidator` s'arrête au premier échec : un lot refusé cache d'autres défauts | 20 |
 | 25 | Un auteur relecteur est approuvé d'office, sans tâche, et tout `PUT` annule la tâche en cours | 21 |
 | 26 | Une étiquette `PII.Sensitive` masque l'échantillon pour tous, faux positifs compris | 21 |
-| 27 | Un serveur MLflow 2.x répond une liste vide au connecteur, sans erreur | 23 |
+| 27 | Un serveur MLflow 2.x répond une liste vide au connecteur, sans erreur, et un 3.x récent exige `--allowed-hosts` | 23 |
 | 28 | `dbt docs generate` après `dbt test` efface le résultat des tests | 23 |
 
 ## Versions
@@ -381,7 +379,7 @@ demi-heure quand on le découvre seul.
 | Postgres (playground) | 16-alpine |
 | Redpanda (chapitre 23) | 24.2.7 |
 | S3Mock (chapitre 23) | 3.12.0 |
-| MLflow (chapitre 23) | 3.4.0 |
+| MLflow (chapitre 23) | 3.17.2 |
 | Metabase (chapitre 23) | 0.50.36 |
 | dbt-postgres (chapitre 23) | 1.9.0 |
 | SDK MCP Python (chapitre 24) | 1.26.0 |
