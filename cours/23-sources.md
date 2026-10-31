@@ -73,6 +73,11 @@ registry returned no registered models »*. Passer le serveur en 3.x l'a réglé
 version de modèle sans exécution d'origine est ignorée (*« Run ID not found »*), d'où le
 `runs/create` du script.
 
+Le laboratoire utilise MLflow 3.17.2. Cette version rejette par sécurité les appels dont le nom
+d'hôte n'est pas autorisé : sans `--allowed-hosts omlab-mlflow:5000`, le connecteur reçoit un 403.
+L'avertissement *« Cannot read the model signature »* reste normal ici, car le TP n'enregistre
+aucun artefact : le modèle arrive sans sa signature.
+
 **Airflow se lit directement dans sa base.** `connection: {type: Backend}` ne marche que depuis
 le conteneur qui héberge Airflow. Sur une vraie installation, utilisez l'API REST. Vous verrez
 aussi les DAG techniques d'OpenMetadata, comme `airflow_metadata_extraction`.
@@ -238,6 +243,9 @@ Chapitre 23 — Au-delà de Postgres
 
 **« MLflow : 0 modèle, aucune erreur. »** Comparez les versions : le connecteur embarque un
 client 3.x. Un serveur 2.x répond par une liste vide.
+
+**« MLflow répond 403 au connecteur. »** Depuis les versions récentes, le serveur vérifie le nom
+d'hôte. Ajoutez le nom utilisé par le connecteur à `--allowed-hosts`.
 
 **« Mon test dbt n'a pas de résultat. »** Vérifiez que `dbt test` est la dernière commande avant
 l'ingestion : `run_results.json` ne garde que la dernière.

@@ -26,9 +26,9 @@ services:
     networks: [app_net]
 
   omlab-mlflow:
-    image: ghcr.io/mlflow/mlflow:v3.4.0
+    image: ghcr.io/mlflow/mlflow:v3.17.2
     container_name: omlab_mlflow
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////tmp/mlflow.db --default-artifact-root /tmp/artefacts
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////tmp/mlflow.db --default-artifact-root /tmp/artefacts --allowed-hosts omlab-mlflow:5000
     networks: [app_net]
 
   omlab-metabase:
