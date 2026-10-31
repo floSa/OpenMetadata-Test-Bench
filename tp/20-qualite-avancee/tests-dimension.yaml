@@ -1,0 +1,33 @@
+# =====================================================================
+# Chapitre 20 — exécute les tests déjà déclarés sur raw.customers
+# =====================================================================
+#   ./omlab py tp/20-qualite-avancee/03_test_dimension.py
+#   ./omlab test tp/20-qualite-avancee/tests-dimension.yaml
+#
+# Le bloc testCases du YAML refuse dimensionColumns (« Extra inputs are not
+# permitted ») : un test par segment se déclare par l'API ou dans l'interface.
+# Sans testCases, le runner exécute tout ce que le catalogue connaît sur la table.
+# =====================================================================
+
+source:
+  type: postgres
+  serviceName: ${OMLAB_SERVICE_NAME}
+  sourceConfig:
+    config:
+      type: TestSuite
+      entityFullyQualifiedName: ${OMLAB_SERVICE_NAME}.omlab.raw.customers
+
+processor:
+  type: orm-test-runner
+  config: {}
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}

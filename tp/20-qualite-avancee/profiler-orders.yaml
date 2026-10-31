@@ -1,0 +1,43 @@
+# =====================================================================
+# Chapitre 20 — profil de raw.orders, avec les métriques maison
+# =====================================================================
+#   ./omlab profile tp/20-qualite-avancee/profiler-orders.yaml
+# =====================================================================
+
+source:
+  type: postgres
+  serviceName: ${OMLAB_SERVICE_NAME}
+  serviceConnection:
+    config:
+      type: Postgres
+      username: ${OMLAB_PG_USER}
+      authType:
+        password: ${OMLAB_PG_PASSWORD}
+      hostPort: ${OMLAB_PG_HOST_INTERNAL}:${OMLAB_PG_PORT_INTERNAL}
+      database: ${OMLAB_PG_DB}
+
+  sourceConfig:
+    config:
+      type: Profiler
+      tableFilterPattern:
+        includes:
+          - ^orders$
+      schemaFilterPattern:
+        includes:
+          - ^raw$
+
+processor:
+  type: orm-profiler
+  config: {}
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: ${OM_HOST_INTERNAL}/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_TOKEN}
