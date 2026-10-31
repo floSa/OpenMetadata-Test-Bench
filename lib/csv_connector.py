@@ -105,9 +105,9 @@ class CsvFolderSource(Source):
 
         # Les connecteurs officiels s'appuient sur une mécanique interne qui
         # crée le service à leur place. Un connecteur maison n'en bénéficie
-        # PAS : sans ces quelques lignes, le workflow échoue à la toute fin
-        # sur « databaseService instance for ... not found », alors même que
-        # le résumé affiche 100 % de succès. Symptôme déroutant, cause banale.
+        # PAS : sans ces quelques lignes, rien n'est écrit, et l'erreur parle
+        # de la base (« Entity not found: database ... ») alors que c'est le
+        # service qui manque. Symptôme déroutant, cause banale.
         service = self.metadata.get_by_name(
             entity=DatabaseService, fqn=self.service_name
         )

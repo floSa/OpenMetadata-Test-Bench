@@ -147,7 +147,7 @@ def chapitre_02(m: Manuel) -> None:
         "side-bar-app-bar-item-explore",
         "side-bar-observability",
         "side-bar-governance",
-        m.page.locator("[data-testid='left-sidebar'] a[href='/settings']"),
+        m.page.locator("[data-testid='left-sidebar'] a[href='/settings']").locator("xpath=ancestor::li[1]"),
     )
     m.enregistrer("02-accueil")
 
@@ -203,7 +203,8 @@ def chapitre_04(m: Manuel) -> None:
 
     m.tid("Postgres").click()
     m.reposer()
-    m.page.set_viewport_size({"width": 1440, "height": 1300})
+    # Assez haut pour tout voir : un défilement décalerait les pastilles déjà posées.
+    m.page.set_viewport_size({"width": 1440, "height": 1500})
     m.page.wait_for_timeout(800)
     m.noter(m.page.get_by_placeholder("Service Name"), "test-connection-btn", "next-button")
     m.enregistrer("04-connexion")
@@ -306,7 +307,8 @@ def chapitre_08(m: Manuel) -> None:
 
     m.page.locator("tr[data-row-key$='.national_id'] [data-testid^='classification-tags'] [data-testid='add-tag']").click()
     m.page.wait_for_timeout(500)
-    m.page.get_by_placeholder("Search Tags").last.fill("PII")
+    # « Search Tags » est un simple libellé : le vrai champ est la liste déroulante de la ligne.
+    m.page.locator("tr[data-row-key$='.national_id'] input[role='combobox']").fill("PII")
     m.reposer(1200)
     m.enregistrer("08-poser-etiquette")
 
@@ -475,6 +477,7 @@ def connexion_anonyme(navigateur) -> None:
     page = navigateur.new_page(viewport={"width": 1440, "height": 900}, device_scale_factor=DENSITE, locale="en-US")
     m = Manuel(page)
     m.ouvrir("/signin")
+    m.tid("email").wait_for(timeout=30000)  # sans cache, la première page tarde à se construire
     m.noter("email", "password", "login")
     m.enregistrer("02-connexion")
     page.close()

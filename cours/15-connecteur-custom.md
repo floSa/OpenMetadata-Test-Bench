@@ -134,22 +134,19 @@ if service is None:
     ))
 ```
 
-…le workflow affiche fièrement :
-
-```
-Workflow Success %: 100.0
-```
-
-puis, juste après :
+…le workflow échoue ainsi :
 
 ```
 Failed to flush entities to bulk API:
-  message='databaseService instance for omlab_fichiers not found' status=400
+  message='Entity not found: database omlab_fichiers.exports' status=400
+Workflow Success %: 57.14
 ```
 
-Six entités produites, zéro écrite, et un résumé qui annonce 100 % de succès.
-Le sink échoue **après** le calcul du résumé. Retenez la leçon générale :
-sur ce produit, **lisez toujours les lignes qui suivent le résumé**.
+Six entités produites, zéro écrite. Le message parle de la base, alors que c'est le
+service qui manque : la création de la base a échoué la première, et toutes les autres
+en découlent. Les versions 1.x étaient pires, avec un résumé à 100 % de succès. Depuis
+la 2.0, le pourcentage chute et la commande rend un code d'erreur. Retenez la leçon
+générale : sur ce produit, **lisez les lignes du sink**, pas seulement le résumé.
 
 ## 4. Faire tourner
 

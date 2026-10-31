@@ -58,7 +58,7 @@ om = client()
 Table      : omlab_postgres.omlab.raw.customers
 Type       : Regular
 Description: Clients de la boutique, un enregistrement par client.
-Version    : 0.2
+Version    : 0.3
 
 Colonnes :
   customer_id    INT        PRIMARY_KEY  tags: Commerce.Client

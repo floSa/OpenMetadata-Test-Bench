@@ -118,7 +118,7 @@ version. Sous `./omlab demo`, qui enchaîne les étapes, le premier passage affi
 === 3. Historique ===
   3 version(s) enregistrée(s)
     v0.3 par ingestion-bot  champs=['description']
-    v0.2 par ingestion-bot  champs=['description', 'tags']
+    v0.2 par ingestion-bot  champs=['description', 'tags', 'columns.name.tags', 'columns.created_at.tags']
     v0.1 par ingestion-bot  champs=[]
 ```
 
@@ -141,8 +141,8 @@ GET /api/v1/search/query?q=commande&index=table_search_index&size=5
 ```
 === 4. Recherche (Elasticsearch, pas la base) ===
   2 résultat(s) pour « commande » :
-      0.60  omlab_postgres.omlab.analytics.fct_orders
-      0.60  omlab_postgres.omlab.raw.order_items
+      1.74  omlab_postgres.omlab.analytics.fct_orders
+      1.49  omlab_postgres.omlab.raw.order_items
 ```
 
 `/tables` interroge Postgres : exact, lent à filtrer, immédiatement à jour.

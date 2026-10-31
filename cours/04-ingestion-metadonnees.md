@@ -133,8 +133,13 @@ chapitre 16.
 Le workflow commence par tester la connexion, étape par étape :
 
 ```
-Running CheckAccess...      Running GetSchemas...     Running GetViews...
-Running GetDatabases...     Running GetTables...      Running GetTableComments...
+CheckAccess: Passed
+GetDatabases: Passed
+GetSchemas: Passed
+GetTables: Passed
+GetViews: Passed
+GetTableComments: Passed
+Test connection for 'Postgres': Successful
 ```
 
 C'est précieux au débogage : si `CheckAccess` passe mais que `GetSchemas`

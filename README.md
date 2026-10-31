@@ -321,7 +321,7 @@ demi-heure quand on le découvre seul.
 | 15 | Un test retiré du YAML continue de tourner : le YAML ne supprime jamais | 10 |
 | 16 | `filteringRules` est calculé : en écriture, c'est `input` | 12 |
 | 17 | `?fields=columns` renvoie les colonnes **sans** leurs étiquettes | 13 |
-| 18 | Un connecteur maison doit créer son service lui-même, sinon 100 % de succès et zéro écriture | 15 |
+| 18 | Un connecteur maison doit créer son service lui-même, sinon zéro écriture et une erreur qui accuse la base | 15 |
 | 19 | Le champ `assets` d'un produit de données est ignoré sans erreur : il faut passer par `/assets/add` | 17 |
 | 20 | `ingestion-bot` n'a pas le droit `CreateTask` : `POST /tasks` répond 403 | 17 |
 

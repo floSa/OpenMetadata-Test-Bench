@@ -21,7 +21,7 @@ La colonne **Essai** dit ce qui a été fait pour de vrai sur le laboratoire en 
 | Fonction | Essai | Chapitre |
 |---|---|---|
 | Recherche, facettes, syntaxe Lucene | TP | 03 |
-| Fiche d'asset, versions, abonnement, votes | TP | 03 |
+| Fiche d'asset, versions, abonnement, votes | écran | 03 |
 | Panneau **Asset Health**, certification, rétention | écran | 03 |
 | Popularité et percentiles d'usage | TP | 06 |
 | Lineage de service (menu **Lineage**) | écran | 17 |
@@ -73,7 +73,7 @@ La colonne **Essai** dit ce qui a été fait pour de vrai sur le laboratoire en 
 |---|---|---|
 | API REST | TP | 13 |
 | SDK Python | TP | 14 |
-| Applications internes | écran | 16 |
+| Applications internes | TP | 16 |
 | Annonces et tâches, avec leurs nouvelles routes | TP | 17 |
 | **Context Center** : articles | TP | 17 |
 | Context Center : documents et mémoires | écran | 17 |
@@ -270,8 +270,8 @@ d'origine, comme l'approbation des termes de glossaire.
 
 **Les formulaires d'entrée.** *Settings → Governance → Intake Forms* impose des champs à la
 création des produits de données, des domaines et des termes de glossaire, côté API comme
-côté interface. Aucun n'est défini ici : un formulaire ferait échouer le TP de la section 2
-tant que ses champs ne seraient pas fournis.
+côté interface. Aucun n'est défini ici : un formulaire pourrait bloquer le TP de la section 2 tant que
+ses champs ne seraient pas fournis.
 
 ![La page Intake Forms](img/17-intake.png)
 
