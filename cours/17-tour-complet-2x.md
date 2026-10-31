@@ -279,7 +279,8 @@ section **Data Assets (1)**, à droite, relie l'article à la table.
 ![Un article du Context Center](img/17-article.png)
 
 **L'ontologie.** *Govern → Ontology Explorer* dessine les termes de glossaire et leurs
-relations. Seuls `Commande` et `Avoir` sont reliés, depuis le [chapitre 21](21-gouvernance-avancee.md).
+relations. La capture vient du catalogue de fin de parcours : le [chapitre 21](21-gouvernance-avancee.md)
+relie `Commande` à `Avoir` et importe `Transport` et `Livraison`. Les autres termes restent isolés.
 
 ![L'Ontology Explorer](img/17-ontologie.png)
 

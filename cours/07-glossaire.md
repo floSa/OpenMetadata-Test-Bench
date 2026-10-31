@@ -143,7 +143,10 @@ contributeurs.
 sur *Glossaire Commerce*. L'onglet **Terms (2)** liste les termes et leur statut, et
 **Add term (3)** en crée un à la main.
 
-![Le glossaire Commerce et ses quatre termes](img/07-glossaire.png)
+![Le glossaire Commerce et ses termes](img/07-glossaire.png)
+
+La capture vient du catalogue de fin de parcours : `Panier` arrive au [chapitre 19](19-import-export.md),
+et les glossaires `Finance` et `Logistique` au [chapitre 21](21-gouvernance-avancee.md).
 
 **Lire un terme.** Cliquez sur *Chiffre d'affaires*. La fiche donne la définition et
 les **Synonyms (1)**. L'onglet **Assets (2)** fait le lien vers les données.
